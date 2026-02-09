@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>約数マスター | 計算が速くなる！約数トレーニングゲーム</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00e5ff;
+            --magenta: #ff00e5;
+            --yellow: #ffe600;
+            --green: #39ff14;
+            --blue-dark: #0a0e2a;
+            --blue-mid: #111940;
+            --text: #e8eaf6;
+            --text-sub: #9ea7c0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--blue-dark);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        /* ===== HEADER ===== */
+        .lp-header {
+            position: fixed; top: 0; left: 0; right: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 24px;
+            background: rgba(10,14,42,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,229,255,0.1);
+            z-index: 1000;
+        }
+        .lp-header-logo { font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.85rem; color: var(--cyan); letter-spacing: 2px; }
+        .lp-lang-btn { font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.7rem; color: var(--cyan); background: rgba(0,229,255,0.08); border: 1px solid rgba(0,229,255,0.3); border-radius: 3px; padding: 4px 14px; cursor: pointer; letter-spacing: 1px; }
+
+        /* ===== HERO ===== */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 20px 80px;
+            padding-top: 60px;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(0,229,255,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(255,0,229,0.06) 0%, transparent 50%),
+                var(--blue-dark);
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,229,255,0.04) 40px, rgba(0,229,255,0.04) 41px),
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,229,255,0.04) 40px, rgba(0,229,255,0.04) 41px);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(0,229,255,0.1);
+            border: 1px solid rgba(0,229,255,0.3);
+            color: var(--cyan);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 6px 20px;
+            border-radius: 100px;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        .hero-logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(2.2rem, 7vw, 4.5rem);
+            font-weight: 900;
+            color: var(--cyan);
+            text-shadow: 0 0 40px rgba(0,229,255,0.5), 0 0 80px rgba(0,229,255,0.2);
+            letter-spacing: 4px;
+            line-height: 1.2;
+        }
+
+        .hero-logo-sub {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(1rem, 3vw, 1.6rem);
+            font-weight: 700;
+            color: var(--yellow);
+            text-shadow: 0 0 20px rgba(255,230,0,0.4);
+            letter-spacing: 6px;
+            margin-top: 4px;
+            margin-bottom: 32px;
+        }
+
+        .hero-catch {
+            font-size: clamp(1.4rem, 4.5vw, 2.4rem);
+            font-weight: 900;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .hero-catch .hl-cyan { color: var(--cyan); }
+        .hero-catch .hl-yellow { color: var(--yellow); }
+        .hero-catch .hl-green { color: var(--green); }
+
+        .hero-sub {
+            font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+            color: var(--text-sub);
+            max-width: 560px;
+            margin-bottom: 40px;
+        }
+
+        .cta-btn {
+            display: inline-block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #000;
+            background: linear-gradient(135deg, var(--green), #00e676);
+            padding: 16px 48px;
+            border-radius: 4px;
+            text-decoration: none;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 20px rgba(57,255,20,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(57,255,20,0.4);
+        }
+
+        .hero-note {
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .app-store-badge {
+            margin-top: 12px;
+        }
+
+        /* Floating numbers animation */
+        .float-nums {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .float-num {
+            position: absolute;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            opacity: 0.04;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.05; }
+            90% { opacity: 0.05; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* ===== SECTIONS ===== */
+        section {
+            padding: 80px 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.7rem;
+            color: var(--cyan);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: clamp(1.4rem, 4vw, 2rem);
+            font-weight: 900;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .section-title .hl { color: var(--cyan); }
+
+        .section-body {
+            font-size: 1rem;
+            color: var(--text-sub);
+            line-height: 2;
+        }
+
+        /* ===== PROBLEM SECTION ===== */
+        .problem-section {
+            background: linear-gradient(180deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+            max-width: none;
+            padding: 80px 20px;
+        }
+
+        .problem-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .problem-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .problem-card {
+            background: rgba(0,229,255,0.04);
+            border: 1px solid rgba(0,229,255,0.12);
+            border-radius: 8px;
+            padding: 28px 24px;
+        }
+
+        .problem-card-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+
+        .problem-card h3 {
+            font-size: 1rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .problem-card p {
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            line-height: 1.7;
+        }
+
+        /* ===== WHY SECTION ===== */
+        .why-box {
+            margin-top: 40px;
+            background: rgba(255,230,0,0.04);
+            border: 1px solid rgba(255,230,0,0.15);
+            border-radius: 8px;
+            padding: 32px 28px;
+        }
+
+        .why-box h3 {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--yellow);
+            margin-bottom: 16px;
+        }
+
+        .example-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .example-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .example-q {
+            font-size: 1.1rem;
+            font-weight: 900;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .example-a {
+            font-size: 0.85rem;
+            color: var(--cyan);
+            font-weight: 700;
+        }
+
+        .example-a span {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-sub);
+            font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* ===== FEATURES ===== */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: var(--blue-mid);
+            border-radius: 8px;
+            padding: 32px 24px;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: border-color 0.3s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(0,229,255,0.3);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 16px;
+        }
+
+        .fi-cyan { background: rgba(0,229,255,0.1); }
+        .fi-magenta { background: rgba(255,0,229,0.1); }
+        .fi-yellow { background: rgba(255,230,0,0.1); }
+        .fi-green { background: rgba(57,255,20,0.1); }
+
+        .feature-card h3 {
+            font-size: 1rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .feature-card p {
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            line-height: 1.7;
+        }
+
+        /* ===== MODES ===== */
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .mode-card {
+            text-align: center;
+            padding: 28px 20px;
+            border-radius: 8px;
+            border: 1px solid;
+        }
+
+        .mc-pair { border-color: rgba(0,229,255,0.3); background: rgba(0,229,255,0.04); }
+        .mc-div { border-color: rgba(255,0,229,0.3); background: rgba(255,0,229,0.04); }
+        .mc-common { border-color: rgba(255,230,0,0.3); background: rgba(255,230,0,0.04); }
+        .mc-time { border-color: rgba(57,255,20,0.3); background: rgba(57,255,20,0.04); }
+
+        .mode-card h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .mc-pair h3 { color: var(--cyan); }
+        .mc-div h3 { color: var(--magenta); }
+        .mc-common h3 { color: var(--yellow); }
+        .mc-time h3 { color: var(--green); }
+
+        .mode-card p {
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            line-height: 1.6;
+        }
+
+        /* ===== USP ===== */
+        .usp-section {
+            max-width: none;
+            padding: 80px 20px;
+            background: linear-gradient(180deg, var(--blue-mid) 0%, var(--blue-dark) 100%);
+        }
+        .usp-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .usp-rows {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 40px;
+        }
+        .usp-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(0,229,255,0.04);
+            border: 1px solid rgba(0,229,255,0.12);
+            border-radius: 8px;
+            padding: 24px 28px;
+        }
+        .usp-row.usp-winner {
+            background: rgba(57,255,20,0.06);
+            border-color: rgba(57,255,20,0.3);
+        }
+        .usp-icon {
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+        .usp-content h3 {
+            font-size: 1rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+        .usp-row.usp-winner h3 {
+            color: var(--green);
+        }
+        .usp-content p {
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            line-height: 1.7;
+        }
+
+        /* ===== VOICE ===== */
+        .voices {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .voice-card {
+            background: var(--blue-mid);
+            border-radius: 8px;
+            padding: 24px;
+            border-left: 3px solid var(--cyan);
+        }
+
+        .voice-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .voice-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .va-1 { background: rgba(0,229,255,0.15); }
+        .va-2 { background: rgba(255,0,229,0.15); }
+        .va-3 { background: rgba(255,230,0,0.15); }
+
+        .voice-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        .voice-grade {
+            font-size: 0.72rem;
+            color: var(--text-sub);
+        }
+
+        .voice-stars {
+            color: var(--yellow);
+            font-size: 0.8rem;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+        }
+
+        .voice-text {
+            font-size: 0.9rem;
+            line-height: 1.8;
+            color: var(--text-sub);
+        }
+
+        .voice-text strong {
+            color: var(--text);
+        }
+
+        /* ===== STEP ===== */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            margin-top: 40px;
+        }
+
+        .step-item {
+            display: flex;
+            gap: 20px;
+            padding: 24px 0;
+        }
+
+        .step-num {
+            flex-shrink: 0;
+            width: 44px;
+            height: 44px;
+            background: rgba(0,229,255,0.1);
+            border: 1px solid rgba(0,229,255,0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 1rem;
+            color: var(--cyan);
+        }
+
+        .step-body h3 {
+            font-size: 1rem;
+            font-weight: 900;
+            margin-bottom: 4px;
+        }
+
+        .step-body p {
+            font-size: 0.88rem;
+            color: var(--text-sub);
+            line-height: 1.7;
+        }
+
+        /* ===== COMPARE TABLE ===== */
+        .compare-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            font-size: 0.9rem;
+        }
+
+        .compare-table th,
+        .compare-table td {
+            padding: 14px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .compare-table th {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            letter-spacing: 1px;
+        }
+
+        .compare-table th:last-child {
+            color: var(--cyan);
+        }
+
+        .compare-table td:first-child {
+            text-align: left;
+            font-weight: 700;
+        }
+
+        .compare-table td:last-child {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .check { color: var(--green); }
+        .cross { color: rgba(255,255,255,0.2); }
+
+        /* ===== FINAL CTA ===== */
+        .final-cta {
+            text-align: center;
+            padding: 80px 20px 100px;
+            max-width: 700px;
+            margin: 0 auto;
+            background: none;
+        }
+
+        .final-cta .section-title {
+            margin-bottom: 16px;
+        }
+
+        .final-cta p {
+            color: var(--text-sub);
+            margin-bottom: 36px;
+            font-size: 1rem;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.25);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* ===== SEPARATOR ===== */
+        .sep {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 600px) {
+            section { padding: 60px 16px; }
+            .problem-section { padding: 60px 16px; }
+            .usp-section { padding: 60px 16px; }
+            .example-grid { grid-template-columns: 1fr; }
+            .hero { padding: 40px 16px 60px; padding-top: 60px; }
+            .cta-btn { padding: 14px 36px; font-size: 0.9rem; }
+        }
+
+        /* ===== Scroll Reveal ===== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== CTA BUTTON PULSE & SHIMMER ===== */
+        @keyframes ctaPulse {
+            0%, 100% { box-shadow: 0 4px 20px rgba(57,255,20,0.3); }
+            50% { box-shadow: 0 4px 30px rgba(57,255,20,0.55), 0 0 60px rgba(57,255,20,0.2); }
+        }
+        @keyframes ctaShimmer {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+        .cta-btn {
+            position: relative;
+            overflow: hidden;
+            animation: ctaPulse 2.5s ease-in-out infinite;
+        }
+        .cta-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            animation: ctaShimmer 3.5s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        /* ===== PHONE MOCKUP ===== */
+        .phone-mockup-wrapper {
+            margin-top: 48px;
+            perspective: 800px;
+        }
+        .phone-mockup {
+            width: 220px;
+            height: 420px;
+            background: #111;
+            border: 3px solid rgba(0,229,255,0.5);
+            border-radius: 28px;
+            margin: 0 auto;
+            padding: 18px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+            box-shadow:
+                0 0 30px rgba(0,229,255,0.2),
+                0 0 60px rgba(0,229,255,0.1),
+                inset 0 0 20px rgba(0,229,255,0.05);
+            animation: phoneGlow 3s ease-in-out infinite alternate;
+        }
+        @keyframes phoneGlow {
+            0% { box-shadow: 0 0 30px rgba(0,229,255,0.2), 0 0 60px rgba(0,229,255,0.1), inset 0 0 20px rgba(0,229,255,0.05); }
+            100% { box-shadow: 0 0 40px rgba(0,229,255,0.35), 0 0 80px rgba(0,229,255,0.15), inset 0 0 30px rgba(0,229,255,0.08); }
+        }
+        .phone-notch {
+            width: 70px;
+            height: 6px;
+            background: #222;
+            border-radius: 3px;
+            margin-bottom: 16px;
+        }
+        .phone-screen {
+            width: 100%;
+            flex: 1;
+            background: rgba(10,14,42,0.95);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 10px;
+            gap: 10px;
+            border: 1px solid rgba(0,229,255,0.1);
+        }
+        .phone-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: var(--cyan);
+            text-shadow: 0 0 15px rgba(0,229,255,0.5);
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+        .phone-subtitle {
+            font-size: 0.55rem;
+            color: var(--yellow);
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+        .phone-modes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            width: 100%;
+        }
+        .phone-mode-btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.55rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 8px 4px;
+            border-radius: 5px;
+            text-align: center;
+            border: 1px solid;
+        }
+        .pmb-pair { color: var(--cyan); border-color: rgba(0,229,255,0.4); background: rgba(0,229,255,0.08); }
+        .pmb-div { color: var(--magenta); border-color: rgba(255,0,229,0.4); background: rgba(255,0,229,0.08); }
+        .pmb-common { color: var(--yellow); border-color: rgba(255,230,0,0.4); background: rgba(255,230,0,0.08); }
+        .pmb-time { color: var(--green); border-color: rgba(57,255,20,0.4); background: rgba(57,255,20,0.08); }
+        .phone-start-btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #000;
+            background: linear-gradient(135deg, var(--green), #00e676);
+            border: none;
+            border-radius: 5px;
+            padding: 10px 0;
+            width: 100%;
+            letter-spacing: 2px;
+            margin-top: 6px;
+            box-shadow: 0 2px 12px rgba(57,255,20,0.3);
+        }
+        .phone-score-bar {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 4px;
+        }
+        .phone-score-item {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.5rem;
+            color: var(--text-sub);
+        }
+        .phone-score-item span {
+            color: var(--cyan);
+            font-weight: 700;
+        }
+
+        /* ===== APP STORE BADGE ===== */
+        .app-store-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #000;
+            border: 1.5px solid rgba(255,255,255,0.25);
+            border-radius: 10px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #fff;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            margin-top: 12px;
+        }
+        .app-store-link:hover {
+            border-color: rgba(255,255,255,0.5);
+            box-shadow: 0 4px 20px rgba(255,255,255,0.1);
+        }
+        .app-store-link .apple-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+        }
+        .app-store-link .badge-text {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            line-height: 1.2;
+        }
+        .app-store-link .badge-small {
+            font-size: 0.55rem;
+            letter-spacing: 0.5px;
+            opacity: 0.85;
+        }
+        .app-store-link .badge-large {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== STATS COUNTER SECTION ===== */
+        .stats-section {
+            max-width: none;
+            padding: 60px 20px;
+            background: linear-gradient(180deg, var(--blue-dark) 0%, rgba(17,25,64,0.5) 50%, var(--blue-dark) 100%);
+            border-top: 1px solid rgba(0,229,255,0.08);
+            border-bottom: 1px solid rgba(0,229,255,0.08);
+        }
+        .stats-inner {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            text-align: center;
+        }
+        .stat-item {
+            padding: 24px 16px;
+        }
+        .stat-number {
+            font-family: 'Outfit', sans-serif;
+            font-size: clamp(3rem, 8vw, 4.5rem);
+            font-weight: 900;
+            color: var(--cyan);
+            text-shadow: 0 0 30px rgba(0,229,255,0.4), 0 0 60px rgba(0,229,255,0.15);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            line-height: 1.5;
+        }
+
+        /* ===== VISUAL POLISH ===== */
+        /* Voice card hover lift */
+        .voice-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .voice-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(0,229,255,0.1);
+            border-color: var(--cyan);
+        }
+
+        /* Mode card glow on hover */
+        .mode-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .mode-card:hover {
+            transform: translateY(-4px);
+        }
+        .mc-pair:hover { box-shadow: 0 8px 30px rgba(0,229,255,0.2); }
+        .mc-div:hover { box-shadow: 0 8px 30px rgba(255,0,229,0.2); }
+        .mc-common:hover { box-shadow: 0 8px 30px rgba(255,230,0,0.2); }
+        .mc-time:hover { box-shadow: 0 8px 30px rgba(57,255,20,0.2); }
+
+        /* Feature card hover glow */
+        .feature-card {
+            transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0,229,255,0.08);
+        }
+
+        /* Section gradient transitions */
+        .problem-section {
+            background: linear-gradient(180deg, var(--blue-dark) 0%, var(--blue-mid) 40%, var(--blue-mid) 60%, var(--blue-dark) 100%);
+        }
+
+        /* ===== FOOTER IMPROVEMENTS ===== */
+        footer {
+            text-align: center;
+            padding: 40px 20px 32px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.25);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .footer-links a {
+            color: rgba(255,255,255,0.4);
+            text-decoration: none;
+            font-size: 0.78rem;
+            transition: color 0.3s;
+        }
+        .footer-links a:hover {
+            color: var(--cyan);
+        }
+        .footer-heart {
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* ===== MOBILE RESPONSIVE ADDITIONS ===== */
+        @media (max-width: 600px) {
+            .stats-inner {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .stat-item {
+                padding: 16px;
+            }
+            .stat-number {
+                font-size: 3rem;
+            }
+            .phone-mockup {
+                width: 180px;
+                height: 350px;
+                padding: 14px 10px;
+            }
+            .phone-mockup-wrapper {
+                margin-top: 36px;
+            }
+            .phone-title {
+                font-size: 0.72rem;
+            }
+            .phone-mode-btn {
+                font-size: 0.5rem;
+                padding: 6px 3px;
+            }
+            .phone-start-btn {
+                font-size: 0.6rem;
+                padding: 8px 0;
+            }
+            .app-store-link {
+                padding: 8px 16px;
+            }
+            .app-store-link .badge-large {
+                font-size: 0.9rem;
+            }
+            .footer-links {
+                gap: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="lp-header">
+    <span class="lp-header-logo">DIVISOR MASTER</span>
+    <button class="lp-lang-btn" id="lp-lang-toggle" onclick="toggleLpLang()">EN</button>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+    <div class="float-nums" id="float-nums"></div>
+    <div class="hero-badge" data-i18n="heroBadge">無料で遊べるブラウザゲーム</div>
+    <div class="hero-logo">DIVISOR MASTER</div>
+    <div class="hero-logo-sub" data-i18n="heroLogoSub">約 数 マ ス タ ー</div>
+    <h1 class="hero-catch" data-i18n="heroCatch" data-i18n-html>
+        <span class="hl-cyan">約数</span>を覚えれば<br>
+        <span class="hl-yellow">計算</span>は<span class="hl-green">速く</span>なる。
+    </h1>
+    <p class="hero-sub" data-i18n="heroSub" data-i18n-html>
+        掛け算九九を覚えるのと同じくらい、<br>
+        約数も覚えるべき。それだけで暗算のスピードが変わります。
+    </p>
+    <a href="divisor-puzzle.html" class="cta-btn" data-i18n="heroCtaBtn">今すぐプレイ</a>
+    <p class="hero-note" data-i18n="heroNote">ダウンロード不要 / スマホ対応</p>
+    <div class="app-store-badge">
+        <a href="https://apps.apple.com/app/id6758949613" target="_blank" rel="noopener" class="app-store-link">
+            <span class="apple-icon"></span>
+            <span class="badge-text">
+                <span class="badge-small" data-i18n="appBadgeSmall">Download on the</span>
+                <span class="badge-large">App Store</span>
+            </span>
+        </a>
+    </div>
+
+    <!-- Phone Mockup -->
+    <div class="phone-mockup-wrapper">
+        <div class="phone-mockup">
+            <div class="phone-notch"></div>
+            <div class="phone-screen">
+                <div class="phone-score-bar">
+                    <div class="phone-score-item">LV <span>5</span></div>
+                    <div class="phone-score-item">COMBO <span>x3</span></div>
+                    <div class="phone-score-item">SC <span>2400</span></div>
+                </div>
+                <div class="phone-title">DIVISOR MASTER</div>
+                <div class="phone-subtitle" data-i18n="phoneSub">約 数 マ ス タ ー</div>
+                <div class="phone-modes">
+                    <div class="phone-mode-btn pmb-pair">PAIR</div>
+                    <div class="phone-mode-btn pmb-div">DIVISOR</div>
+                    <div class="phone-mode-btn pmb-common">COMMON</div>
+                    <div class="phone-mode-btn pmb-time">TIME ATK</div>
+                </div>
+                <div class="phone-start-btn" data-i18n="phoneStart">GAME START</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<div class="stats-section">
+    <div class="stats-inner reveal">
+        <div class="stat-item">
+            <div class="stat-number" data-count="4">0</div>
+            <div class="stat-label" data-i18n="statModesLabel">4つのモード</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-count="15">0</div>
+            <div class="stat-label" data-i18n="statAchievementsLabel">15の実績</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number" data-count="5">0</div>
+            <div class="stat-label" data-i18n="statLevelsLabel">段階の難易度</div>
+        </div>
+    </div>
+</div>
+
+<!-- ===== PROBLEM ===== -->
+<div class="problem-section">
+    <div class="problem-inner">
+        <div class="reveal">
+            <div class="section-label" data-i18n="problemLabel">Problem</div>
+            <h2 class="section-title" data-i18n="problemTitle" data-i18n-html>計算が遅いのは<br><span class="hl">「約数」を知らないから</span>かもしれません</h2>
+            <p class="section-body" data-i18n="problemBody" data-i18n-html>
+                「うちの子、計算が遅い」「暗算が苦手」。<br>
+                その原因は、計算練習の量ではなく<strong style="color: var(--text);">「数のしくみ」を直感的に理解していない</strong>ことにあるかもしれません。
+            </p>
+        </div>
+
+        <div class="problem-cards reveal">
+            <div class="problem-card">
+                <div class="problem-card-icon">&#x1F916;</div>
+                <h3 data-i18n="problemCard1Title">筆算に頼りすぎる</h3>
+                <p data-i18n="problemCard1Text">72 &divide; 8 のような計算でも筆算を書く。「8 &times; 9 = 72」が浮かべば一瞬なのに。</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-card-icon">&#x23F1;</div>
+                <h3 data-i18n="problemCard2Title">テストで時間切れ</h3>
+                <p data-i18n="problemCard2Text">1問ずつは解けるのに、計算のスピードが足りずに最後まで辿りつけない。</p>
+            </div>
+            <div class="problem-card">
+                <div class="problem-card-icon">&#x1F614;</div>
+                <h3 data-i18n="problemCard3Title">分数・約分でつまずく</h3>
+                <p data-i18n="problemCard3Text">12/36 を約分するとき、公約数が思いつかず何度も割り直し。最大公約数12が見えれば一発。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ===== WHY ===== -->
+<section class="reveal">
+    <div class="section-label" data-i18n="whyLabel">Why</div>
+    <h2 class="section-title" data-i18n="whyTitle" data-i18n-html><span class="hl">九九と同じように</span><br>約数も「覚えてしまう」のが最強</h2>
+
+    <p class="section-body" data-i18n="whyBody" data-i18n-html>
+        掛け算の九九は、考えなくても答えが口から出てくるまで反復しますよね。<br>
+        約数もまったく同じ。<strong style="color:var(--text);">「24の約数？ 1, 2, 3, 4, 6, 8, 12, 24！」と瞬時に出る</strong>ようになれば、暗算力は劇的に上がります。
+    </p>
+
+    <div class="why-box">
+        <h3 data-i18n="whyBoxTitle">約数が見えると、こんな計算が「瞬殺」に</h3>
+        <div class="example-grid">
+            <div class="example-item">
+                <div class="example-q">84 &divide; 12 = ?</div>
+                <div class="example-a">
+                    7
+                    <span data-i18n="whyEx1">12 &times; 7 = 84 が浮かぶ</span>
+                </div>
+            </div>
+            <div class="example-item">
+                <div class="example-q" data-i18n="whyEx2Q">48/72 を約分</div>
+                <div class="example-a">
+                    2/3
+                    <span data-i18n="whyEx2">最大公約数24が見える</span>
+                </div>
+            </div>
+            <div class="example-item">
+                <div class="example-q">56 &divide; 8 = ?</div>
+                <div class="example-a">
+                    7
+                    <span data-i18n="whyEx3">56 = 8 &times; 7 が即座に</span>
+                </div>
+            </div>
+            <div class="example-item">
+                <div class="example-q">3/5 + 1/4 = ?</div>
+                <div class="example-a">
+                    17/20
+                    <span data-i18n="whyEx4">最小公倍数20がすぐ出る</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== HOW ===== -->
+<section class="reveal">
+    <div class="section-label" data-i18n="howLabel">How it works</div>
+    <h2 class="section-title" data-i18n="howTitle" data-i18n-html>ゲーム感覚だから<br><span class="hl">「勉強してる感」ゼロ</span></h2>
+    <p class="section-body" data-i18n="howBody" data-i18n-html>
+        約数マスターは、アーケードゲームのような演出で約数を繰り返しトレーニング。<br>
+        コンボ、レベルアップ、スコアランキング。気づいたら夢中で約数を覚えています。
+    </p>
+
+    <div class="features">
+        <div class="feature-card">
+            <div class="feature-icon fi-cyan">&#x26A1;</div>
+            <h3 data-i18n="feat1Title">瞬発力トレーニング</h3>
+            <p data-i18n="feat1Text">制限時間内に約数を答える。繰り返すうちに「考える」から「思い出す」に変わります。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-magenta">&#x1F525;</div>
+            <h3 data-i18n="feat2Title">コンボで燃える</h3>
+            <p data-i18n="feat2Text">連続正解でコンボ倍率がアップ。5コンボで画面が揺れ、10コンボで大爆発。やめられない快感。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-yellow">&#x1F4C8;</div>
+            <h3 data-i18n="feat3Title">レベルで成長実感</h3>
+            <p data-i18n="feat3Text">Lv1は1〜20の小さな数。正解するとレベルが上がり、扱う数がどんどん大きくなっていきます。</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon fi-green">&#x1F3AE;</div>
+            <h3 data-i18n="feat4Title">アーケード演出</h3>
+            <p data-i18n="feat4Text">ネオン色のUI、パーティクルエフェクト、BGM。まるでゲームセンターにいるような体験。</p>
+        </div>
+    </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== MODES ===== -->
+<section class="reveal">
+    <div class="section-label" data-i18n="modesLabel">Game Modes</div>
+    <h2 class="section-title" data-i18n="modesTitle" data-i18n-html>4つのモードで<span class="hl">飽きない</span></h2>
+
+    <div class="modes-grid">
+        <div class="mode-card mc-pair">
+            <h3>PAIR</h3>
+            <p data-i18n="modePairText">掛けてターゲットになるペアを探す。因数分解の直感力アップ。</p>
+        </div>
+        <div class="mode-card mc-div">
+            <h3>DIVISOR</h3>
+            <p data-i18n="modeDivisorText">数の約数をすべて選ぶ。約数の網羅力を鍛える基本モード。</p>
+        </div>
+        <div class="mode-card mc-common">
+            <h3>COMMON</h3>
+            <p data-i18n="modeCommonText">2つの数の公約数を選ぶ。約分・通分に直結するスキル。</p>
+        </div>
+        <div class="mode-card mc-time">
+            <h3>TIME ATK</h3>
+            <p data-i18n="modeTimeText">60秒間でひたすら解く。スピードと正確さの限界に挑戦。</p>
+        </div>
+    </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== USP ===== -->
+<div class="usp-section">
+    <div class="usp-inner reveal">
+        <div class="section-label" data-i18n="uspLabel">Difference</div>
+        <h2 class="section-title" data-i18n="uspTitle" data-i18n-html>他の計算ドリルとの<span class="hl">違い</span></h2>
+
+        <div class="usp-rows">
+            <div class="usp-row">
+                <div class="usp-icon">&#x274C;</div>
+                <div class="usp-content">
+                    <h3 data-i18n="uspRow1Title">紙のドリル</h3>
+                    <p data-i18n="uspRow1Text">退屈で続かない。すぐ飽きてしまい、自分から取り組もうとしない。</p>
+                </div>
+            </div>
+            <div class="usp-row">
+                <div class="usp-icon">&#x274C;</div>
+                <div class="usp-content">
+                    <h3 data-i18n="uspRow2Title">計算アプリ</h3>
+                    <p data-i18n="uspRow2Text">四則演算の反復ばかり。約数や因数に特化したトレーニングがない。</p>
+                </div>
+            </div>
+            <div class="usp-row usp-winner">
+                <div class="usp-icon">&#x2705;</div>
+                <div class="usp-content">
+                    <h3 data-i18n="uspRow3Title">約数マスター</h3>
+                    <p data-i18n="uspRow3Text">約数に特化 × アーケード体験。ゲームに夢中になるうちに、約数が自然と身につく。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- ===== BENEFIT ===== -->
+<section class="reveal">
+    <div class="section-label" data-i18n="effectLabel">Effect</div>
+    <h2 class="section-title" data-i18n="effectTitle" data-i18n-html>約数が身につくと、<span class="hl">こう変わる</span></h2>
+
+    <table class="compare-table">
+        <thead>
+            <tr>
+                <th></th>
+                <th data-i18n="effectThBefore">今まで</th>
+                <th data-i18n="effectThAfter">約数マスター後</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td data-i18n="effectRow1Label">割り算</td>
+                <td data-i18n="effectRow1Before">筆算で計算</td>
+                <td data-i18n="effectRow1After">暗算で即答</td>
+            </tr>
+            <tr>
+                <td data-i18n="effectRow2Label">約分</td>
+                <td data-i18n="effectRow2Before">2, 3で何度も割る</td>
+                <td data-i18n="effectRow2After">最大公約数で一発</td>
+            </tr>
+            <tr>
+                <td data-i18n="effectRow3Label">通分</td>
+                <td data-i18n="effectRow3Before">公倍数が見つからない</td>
+                <td data-i18n="effectRow3After">最小公倍数がすぐ出る</td>
+            </tr>
+            <tr>
+                <td data-i18n="effectRow4Label">因数分解</td>
+                <td data-i18n="effectRow4Before">パターン暗記で対応</td>
+                <td data-i18n="effectRow4After">数の構造が見える</td>
+            </tr>
+            <tr>
+                <td data-i18n="effectRow5Label">テスト</td>
+                <td data-i18n="effectRow5Before">時間ギリギリ</td>
+                <td data-i18n="effectRow5After">見直す余裕あり</td>
+            </tr>
+        </tbody>
+    </table>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== VOICE ===== -->
+<section class="reveal">
+    <div class="section-label" data-i18n="voiceLabel">Voice</div>
+    <h2 class="section-title" data-i18n="voiceTitle" data-i18n-html>遊んだ<span class="hl">子どもたちの声</span></h2>
+
+    <div class="voices">
+        <div class="voice-card">
+            <div class="voice-header">
+                <div class="voice-avatar va-1">&#x1F466;</div>
+                <div>
+                    <div class="voice-name" data-i18n="voice1Name">Kくん</div>
+                    <div class="voice-grade" data-i18n="voice1Grade">小学5年生</div>
+                </div>
+            </div>
+            <div class="voice-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="voice-text" data-i18n="voice1Text" data-i18n-html>
+                ゲームだと思ってやってたら、<strong>分数の約分がめっちゃ速くなった</strong>。学校のテストで時間が余るようになって、先生にも「計算速くなったね」って褒められた！
+            </p>
+        </div>
+        <div class="voice-card">
+            <div class="voice-header">
+                <div class="voice-avatar va-2">&#x1F467;</div>
+                <div>
+                    <div class="voice-name" data-i18n="voice2Name">Mさん</div>
+                    <div class="voice-grade" data-i18n="voice2Grade">中学1年生</div>
+                </div>
+            </div>
+            <div class="voice-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="voice-text" data-i18n="voice2Text" data-i18n-html>
+                コンボが続くと楽しくて、<strong>毎日5分やるのが習慣</strong>になった。最初はLv3くらいで止まってたけど、今はLv8まで行ける。暗算に自信がついた！
+            </p>
+        </div>
+        <div class="voice-card">
+            <div class="voice-header">
+                <div class="voice-avatar va-3">&#x1F469;</div>
+                <div>
+                    <div class="voice-name" data-i18n="voice3Name">Yさんの保護者</div>
+                    <div class="voice-grade" data-i18n="voice3Grade">小学4年生の母</div>
+                </div>
+            </div>
+            <div class="voice-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+            <p class="voice-text" data-i18n="voice3Text" data-i18n-html>
+                計算ドリルは嫌がるのに、これは自分から「やりたい」と言う。<strong>子どもの自信がついてきた</strong>のがわかる。算数の成績も上がり始めて、親としてもうれしい。
+            </p>
+        </div>
+    </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ===== STEP ===== -->
+<section class="reveal">
+    <div class="section-label" data-i18n="stepLabel">Get Started</div>
+    <h2 class="section-title" data-i18n="stepTitle" data-i18n-html><span class="hl">3ステップ</span>で今すぐ始められる</h2>
+
+    <div class="steps">
+        <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-body">
+                <h3 data-i18n="step1Title">ページを開く</h3>
+                <p data-i18n="step1Text">ダウンロード不要。スマホでもPCでも、ブラウザだけで遊べます。</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-body">
+                <h3 data-i18n="step2Title">好きなモードを選ぶ</h3>
+                <p data-i18n="step2Text">まずはDIVISORモードがおすすめ。約数の基礎が身につきます。</p>
+            </div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-body">
+                <h3 data-i18n="step3Title">毎日5分で効果あり</h3>
+                <p data-i18n="step3Text">短い時間でOK。毎日繰り返すことで、約数が「暗記」から「直感」に変わります。</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FINAL CTA ===== -->
+<section class="final-cta reveal">
+    <h2 class="section-title" data-i18n="finalCtaTitle" data-i18n-html>
+        計算が速い子は、<br><span class="hl">数のしくみが見えている</span>
+    </h2>
+    <p data-i18n="finalCtaBody" data-i18n-html>
+        約数マスターで、お子さまの「数を見る目」を鍛えませんか。<br>
+        1日5分、ゲームで遊ぶだけ。
+    </p>
+    <a href="divisor-puzzle.html" class="cta-btn" data-i18n="finalCtaBtn">無料でプレイする</a>
+    <p class="hero-note" data-i18n="finalCtaNote">登録不要 / 完全無料 / スマホ&PC対応</p>
+</section>
+
+<footer>
+    <div class="footer-links">
+        <a href="privacy.html" data-i18n="footerPrivacy">プライバシーポリシー</a>
+        <a href="support.html" data-i18n="footerSupport">サポート</a>
+        <a href="https://apps.apple.com/app/id6758949613" target="_blank" rel="noopener">App Store</a>
+    </div>
+    <span data-i18n="footer">&copy; 2026 DIVISOR MASTER. All rights reserved.</span>
+    <div class="footer-heart" data-i18n="footerHeart">Built with &#10084;&#65039; for math learners</div>
+</footer>
+
+<script>
+    // ===== Floating numbers background =====
+    const container = document.getElementById('float-nums');
+    const nums = [2, 3, 4, 6, 8, 12, 24, 36, 48, 7, 9, 16, 18, 5, 15, 20, 25, 30, 42, 56, 60, 72, 84, 96];
+    for (let i = 0; i < 30; i++) {
+        const el = document.createElement('div');
+        el.className = 'float-num';
+        el.textContent = nums[Math.floor(Math.random() * nums.length)];
+        el.style.left = Math.random() * 100 + '%';
+        el.style.fontSize = (1.5 + Math.random() * 3) + 'rem';
+        el.style.animationDuration = (12 + Math.random() * 20) + 's';
+        el.style.animationDelay = (-Math.random() * 20) + 's';
+        container.appendChild(el);
+    }
+
+    // ===== Scroll reveal =====
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.15 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ===== i18n System =====
+    let currentLpLang = localStorage.getItem('divisor-master-lp-lang') || 'ja';
+
+    const STRINGS = {
+        ja: {
+            heroBadge: '無料で遊べるブラウザゲーム',
+            heroLogoSub: '約 数 マ ス タ ー',
+            heroCatch: '<span class="hl-cyan">約数</span>を覚えれば<br><span class="hl-yellow">計算</span>は<span class="hl-green">速く</span>なる。',
+            heroSub: '掛け算九九を覚えるのと同じくらい、<br>約数も覚えるべき。それだけで暗算のスピードが変わります。',
+            heroCtaBtn: '今すぐプレイ',
+            heroNote: 'ダウンロード不要 / スマホ対応',
+            appBadgeSmall: 'Download on the',
+            phoneSub: '約 数 マ ス タ ー',
+            phoneStart: 'GAME START',
+            statModesLabel: '4つのモード',
+            statAchievementsLabel: '15の実績',
+            statLevelsLabel: '段階の難易度',
+            problemLabel: 'Problem',
+            problemTitle: '計算が遅いのは<br><span class="hl">「約数」を知らないから</span>かもしれません',
+            problemBody: '「うちの子、計算が遅い」「暗算が苦手」。<br>その原因は、計算練習の量ではなく<strong style="color: var(--text);">「数のしくみ」を直感的に理解していない</strong>ことにあるかもしれません。',
+            problemCard1Title: '筆算に頼りすぎる',
+            problemCard1Text: '72 \u00f7 8 のような計算でも筆算を書く。「8 \u00d7 9 = 72」が浮かべば一瞬なのに。',
+            problemCard2Title: 'テストで時間切れ',
+            problemCard2Text: '1問ずつは解けるのに、計算のスピードが足りずに最後まで辿りつけない。',
+            problemCard3Title: '分数・約分でつまずく',
+            problemCard3Text: '12/36 を約分するとき、公約数が思いつかず何度も割り直し。最大公約数12が見えれば一発。',
+            whyLabel: 'Why',
+            whyTitle: '<span class="hl">九九と同じように</span><br>約数も「覚えてしまう」のが最強',
+            whyBody: '掛け算の九九は、考えなくても答えが口から出てくるまで反復しますよね。<br>約数もまったく同じ。<strong style="color:var(--text);">「24の約数？ 1, 2, 3, 4, 6, 8, 12, 24！」と瞬時に出る</strong>ようになれば、暗算力は劇的に上がります。',
+            whyBoxTitle: '約数が見えると、こんな計算が「瞬殺」に',
+            whyEx1: '12 \u00d7 7 = 84 が浮かぶ',
+            whyEx2Q: '48/72 を約分',
+            whyEx2: '最大公約数24が見える',
+            whyEx3: '56 = 8 \u00d7 7 が即座に',
+            whyEx4: '最小公倍数20がすぐ出る',
+            howLabel: 'How it works',
+            howTitle: 'ゲーム感覚だから<br><span class="hl">「勉強してる感」ゼロ</span>',
+            howBody: '約数マスターは、アーケードゲームのような演出で約数を繰り返しトレーニング。<br>コンボ、レベルアップ、スコアランキング。気づいたら夢中で約数を覚えています。',
+            feat1Title: '瞬発力トレーニング',
+            feat1Text: '制限時間内に約数を答える。繰り返すうちに「考える」から「思い出す」に変わります。',
+            feat2Title: 'コンボで燃える',
+            feat2Text: '連続正解でコンボ倍率がアップ。5コンボで画面が揺れ、10コンボで大爆発。やめられない快感。',
+            feat3Title: 'レベルで成長実感',
+            feat3Text: 'Lv1は1〜20の小さな数。正解するとレベルが上がり、扱う数がどんどん大きくなっていきます。',
+            feat4Title: 'アーケード演出',
+            feat4Text: 'ネオン色のUI、パーティクルエフェクト、BGM。まるでゲームセンターにいるような体験。',
+            modesLabel: 'Game Modes',
+            modesTitle: '4つのモードで<span class="hl">飽きない</span>',
+            modePairText: '掛けてターゲットになるペアを探す。因数分解の直感力アップ。',
+            modeDivisorText: '数の約数をすべて選ぶ。約数の網羅力を鍛える基本モード。',
+            modeCommonText: '2つの数の公約数を選ぶ。約分・通分に直結するスキル。',
+            modeTimeText: '60秒間でひたすら解く。スピードと正確さの限界に挑戦。',
+            uspLabel: 'Difference',
+            uspTitle: '他の計算ドリルとの<span class="hl">違い</span>',
+            uspRow1Title: '紙のドリル',
+            uspRow1Text: '退屈で続かない。すぐ飽きてしまい、自分から取り組もうとしない。',
+            uspRow2Title: '計算アプリ',
+            uspRow2Text: '四則演算の反復ばかり。約数や因数に特化したトレーニングがない。',
+            uspRow3Title: '約数マスター',
+            uspRow3Text: '約数に特化 × アーケード体験。ゲームに夢中になるうちに、約数が自然と身につく。',
+            effectLabel: 'Effect',
+            effectTitle: '約数が身につくと、<span class="hl">こう変わる</span>',
+            effectThBefore: '今まで',
+            effectThAfter: '約数マスター後',
+            effectRow1Label: '割り算',
+            effectRow1Before: '筆算で計算',
+            effectRow1After: '暗算で即答',
+            effectRow2Label: '約分',
+            effectRow2Before: '2, 3で何度も割る',
+            effectRow2After: '最大公約数で一発',
+            effectRow3Label: '通分',
+            effectRow3Before: '公倍数が見つからない',
+            effectRow3After: '最小公倍数がすぐ出る',
+            effectRow4Label: '因数分解',
+            effectRow4Before: 'パターン暗記で対応',
+            effectRow4After: '数の構造が見える',
+            effectRow5Label: 'テスト',
+            effectRow5Before: '時間ギリギリ',
+            effectRow5After: '見直す余裕あり',
+            voiceLabel: 'Voice',
+            voiceTitle: '遊んだ<span class="hl">子どもたちの声</span>',
+            voice1Name: 'Kくん',
+            voice1Grade: '小学5年生',
+            voice1Text: 'ゲームだと思ってやってたら、<strong>分数の約分がめっちゃ速くなった</strong>。学校のテストで時間が余るようになって、先生にも「計算速くなったね」って褒められた！',
+            voice2Name: 'Mさん',
+            voice2Grade: '中学1年生',
+            voice2Text: 'コンボが続くと楽しくて、<strong>毎日5分やるのが習慣</strong>になった。最初はLv3くらいで止まってたけど、今はLv8まで行ける。暗算に自信がついた！',
+            voice3Name: 'Yさんの保護者',
+            voice3Grade: '小学4年生の母',
+            voice3Text: '計算ドリルは嫌がるのに、これは自分から「やりたい」と言う。<strong>子どもの自信がついてきた</strong>のがわかる。算数の成績も上がり始めて、親としてもうれしい。',
+            stepLabel: 'Get Started',
+            stepTitle: '<span class="hl">3ステップ</span>で今すぐ始められる',
+            step1Title: 'ページを開く',
+            step1Text: 'ダウンロード不要。スマホでもPCでも、ブラウザだけで遊べます。',
+            step2Title: '好きなモードを選ぶ',
+            step2Text: 'まずはDIVISORモードがおすすめ。約数の基礎が身につきます。',
+            step3Title: '毎日5分で効果あり',
+            step3Text: '短い時間でOK。毎日繰り返すことで、約数が「暗記」から「直感」に変わります。',
+            finalCtaTitle: '計算が速い子は、<br><span class="hl">数のしくみが見えている</span>',
+            finalCtaBody: '約数マスターで、お子さまの「数を見る目」を鍛えませんか。<br>1日5分、ゲームで遊ぶだけ。',
+            finalCtaBtn: '無料でプレイする',
+            finalCtaNote: '登録不要 / 完全無料 / スマホ&PC対応',
+            footer: '&copy; 2026 DIVISOR MASTER. All rights reserved.',
+            footerPrivacy: 'プライバシーポリシー',
+            footerSupport: 'サポート',
+            footerHeart: 'Built with &#10084;&#65039; for math learners'
+        },
+        en: {
+            heroBadge: 'Free browser game — no download needed',
+            heroLogoSub: 'D I V I S O R &nbsp; M A S T E R',
+            heroCatch: 'Master <span class="hl-cyan">divisors</span>,<br>and <span class="hl-yellow">math</span> gets <span class="hl-green">faster</span>.',
+            heroSub: 'Just like memorizing multiplication tables,<br>learning divisors by heart transforms mental math speed.',
+            heroCtaBtn: 'PLAY NOW',
+            heroNote: 'No download / Works on mobile',
+            appBadgeSmall: 'Download on the',
+            phoneSub: 'D I V I S O R  M A S T E R',
+            phoneStart: 'GAME START',
+            statModesLabel: '4 Game Modes',
+            statAchievementsLabel: '15 Achievements',
+            statLevelsLabel: '5 Difficulty Levels',
+            problemLabel: 'Problem',
+            problemTitle: 'Slow at math?<br><span class="hl">It might be because they don\'t know divisors.</span>',
+            problemBody: '"My child is slow at math." "They struggle with mental arithmetic."<br>The real cause may not be a lack of practice, but <strong style="color: var(--text);">a missing intuitive feel for how numbers work</strong>.',
+            problemCard1Title: 'Over-relying on long division',
+            problemCard1Text: 'They write out 72 \u00f7 8 step by step \u2014 even though knowing "8 \u00d7 9 = 72" would give the answer instantly.',
+            problemCard2Title: 'Running out of time on tests',
+            problemCard2Text: 'They can solve each problem, but calculation speed is too slow to finish the whole test.',
+            problemCard3Title: 'Struggling with fractions',
+            problemCard3Text: 'To simplify 12/36, they divide by 2, then 3, then 2 again. Spotting the GCD of 12 would solve it in one step.',
+            whyLabel: 'Why',
+            whyTitle: '<span class="hl">Just like times tables,</span><br>memorizing divisors is the ultimate shortcut',
+            whyBody: 'You drilled multiplication tables until answers came automatically, right?<br>Divisors work the same way. <strong style="color:var(--text);">When "Divisors of 24? 1, 2, 3, 4, 6, 8, 12, 24!" becomes instant recall</strong>, mental math ability skyrockets.',
+            whyBoxTitle: 'When you can see divisors, these calculations become instant',
+            whyEx1: '12 \u00d7 7 = 84 pops into your head',
+            whyEx2Q: 'Simplify 48/72',
+            whyEx2: 'You see the GCD is 24',
+            whyEx3: '56 = 8 \u00d7 7, instantly',
+            whyEx4: 'LCM of 20 comes right away',
+            howLabel: 'How it works',
+            howTitle: 'It feels like a game,<br><span class="hl">not like studying</span>',
+            howBody: 'DIVISOR MASTER uses arcade-style effects to drill divisors through play.<br>Combos, level-ups, score rankings \u2014 before you know it, you\'ve memorized them all.',
+            feat1Title: 'Reflex training',
+            feat1Text: 'Answer divisors before time runs out. With repetition, it shifts from "thinking" to "instant recall."',
+            feat2Title: 'Addictive combos',
+            feat2Text: 'Consecutive correct answers boost your combo multiplier. 5-combo shakes the screen, 10-combo triggers an explosion. Impossible to stop.',
+            feat3Title: 'Level-based progression',
+            feat3Text: 'Lv1 starts with small numbers (1\u201320). As you level up, the numbers get bigger and the challenge grows.',
+            feat4Title: 'Arcade-style experience',
+            feat4Text: 'Neon UI, particle effects, and BGM. It feels like playing at an arcade, not doing homework.',
+            modesLabel: 'Game Modes',
+            modesTitle: '4 modes to keep it <span class="hl">fresh</span>',
+            modePairText: 'Find pairs that multiply to the target. Builds intuition for factorization.',
+            modeDivisorText: 'Select all divisors of a number. The core mode for building divisor mastery.',
+            modeCommonText: 'Pick common divisors of two numbers. Directly trains fraction skills.',
+            modeTimeText: 'Solve as many as you can in 60 seconds. Push your speed and accuracy to the limit.',
+            uspLabel: 'Difference',
+            uspTitle: 'Why DIVISOR MASTER is <span class="hl">different</span>',
+            uspRow1Title: 'Paper drills',
+            uspRow1Text: 'Boring and hard to sustain. Kids lose interest quickly and won\'t practice on their own.',
+            uspRow2Title: 'Math apps',
+            uspRow2Text: 'Just basic arithmetic on repeat. No training focused on divisors or factorization.',
+            uspRow3Title: 'DIVISOR MASTER',
+            uspRow3Text: 'Divisor-focused training meets arcade excitement. Kids get hooked on the game while naturally learning divisors.',
+            effectLabel: 'Effect',
+            effectTitle: 'Once divisors click, <span class="hl">everything changes</span>',
+            effectThBefore: 'Before',
+            effectThAfter: 'After DIVISOR MASTER',
+            effectRow1Label: 'Division',
+            effectRow1Before: 'Long division on paper',
+            effectRow1After: 'Instant mental math',
+            effectRow2Label: 'Simplifying',
+            effectRow2Before: 'Divide by 2, 3 repeatedly',
+            effectRow2After: 'One step with the GCD',
+            effectRow3Label: 'Common denom.',
+            effectRow3Before: 'Can\'t find the LCM',
+            effectRow3After: 'LCM comes instantly',
+            effectRow4Label: 'Factoring',
+            effectRow4Before: 'Memorize patterns',
+            effectRow4After: 'See number structure',
+            effectRow5Label: 'Tests',
+            effectRow5Before: 'Barely finish in time',
+            effectRow5After: 'Time left to review',
+            voiceLabel: 'Voice',
+            voiceTitle: 'What <span class="hl">kids are saying</span>',
+            voice1Name: 'K (boy)',
+            voice1Grade: '5th grader',
+            voice1Text: 'I thought I was just playing a game, but <strong>simplifying fractions got way faster</strong>. I started finishing tests with time to spare, and my teacher said "your math speed has really improved!"',
+            voice2Name: 'M (girl)',
+            voice2Grade: '7th grader',
+            voice2Text: 'Getting combos is so fun that <strong>playing 5 minutes a day became a habit</strong>. I used to get stuck around Lv3, but now I can reach Lv8. My mental math confidence is way up!',
+            voice3Name: 'Y\'s parent',
+            voice3Grade: 'Mother of a 4th grader',
+            voice3Text: 'She hates math worksheets, but asks to play this on her own. <strong>I can see her confidence growing</strong>. Her math grades are starting to improve too, which makes me really happy as a parent.',
+            stepLabel: 'Get Started',
+            stepTitle: 'Start in <span class="hl">3 easy steps</span>',
+            step1Title: 'Open the page',
+            step1Text: 'No download needed. Play on any device \u2014 phone, tablet, or PC \u2014 right in your browser.',
+            step2Title: 'Pick a mode',
+            step2Text: 'We recommend starting with DIVISOR mode. It builds a solid foundation in divisors.',
+            step3Title: '5 minutes a day is all it takes',
+            step3Text: 'Short sessions work. With daily repetition, divisors shift from "memorized facts" to "instant intuition."',
+            finalCtaTitle: 'Kids who are fast at math<br><span class="hl">can see how numbers work</span>',
+            finalCtaBody: 'Give your child the gift of number sense with DIVISOR MASTER.<br>Just 5 minutes a day. Just play.',
+            finalCtaBtn: 'PLAY FOR FREE',
+            finalCtaNote: 'No sign-up / 100% free / Mobile & PC',
+            footer: '&copy; 2026 DIVISOR MASTER. All rights reserved.',
+            footerPrivacy: 'Privacy Policy',
+            footerSupport: 'Support',
+            footerHeart: 'Built with &#10084;&#65039; for math learners'
+        }
+    };
+
+    function t(key) {
+        return (STRINGS[currentLpLang] && STRINGS[currentLpLang][key]) || key;
+    }
+
+    function applyLpLanguage() {
+        document.querySelectorAll('[data-i18n]').forEach(function(el) {
+            var key = el.getAttribute('data-i18n');
+            var val = t(key);
+            if (el.hasAttribute('data-i18n-html')) {
+                el.innerHTML = val;
+            } else {
+                el.innerHTML = val;
+            }
+        });
+        // Update toggle button text
+        var btn = document.getElementById('lp-lang-toggle');
+        if (btn) {
+            btn.textContent = currentLpLang === 'ja' ? 'EN' : 'JA';
+        }
+        // Update html lang attribute
+        document.documentElement.lang = currentLpLang === 'ja' ? 'ja' : 'en';
+    }
+
+    function toggleLpLang() {
+        currentLpLang = currentLpLang === 'ja' ? 'en' : 'ja';
+        localStorage.setItem('divisor-master-lp-lang', currentLpLang);
+        applyLpLanguage();
+    }
+
+    // Apply saved language on load
+    applyLpLanguage();
+
+    // ===== Animated Stats Counter =====
+    const statCounters = document.querySelectorAll('.stat-number[data-count]');
+    let statsCounted = false;
+
+    function animateCounters() {
+        if (statsCounted) return;
+        statsCounted = true;
+        statCounters.forEach(function(counter) {
+            const target = parseInt(counter.getAttribute('data-count'), 10);
+            const duration = 1800;
+            const startTime = performance.now();
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                // Ease out cubic
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(eased * target);
+                counter.textContent = current;
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    counter.textContent = target;
+                }
+            }
+            requestAnimationFrame(updateCounter);
+        });
+    }
+
+    const statsObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+                animateCounters();
+            }
+        });
+    }, { threshold: 0.3 });
+
+    var statsSection = document.querySelector('.stats-section');
+    if (statsSection) {
+        statsObserver.observe(statsSection);
+    }
+
+    // ===== Parallax for floating numbers =====
+    window.addEventListener('scroll', function() {
+        var scrollY = window.pageYOffset;
+        var floatNums = document.querySelectorAll('.float-num');
+        floatNums.forEach(function(el, i) {
+            var speed = 0.02 + (i % 5) * 0.01;
+            el.style.transform = 'translateY(' + (-scrollY * speed) + 'px)';
+        });
+    }, { passive: true });
+</script>
+
+</body>
+</html>

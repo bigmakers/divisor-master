@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プライバシーポリシー | 約数マスター</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00e5ff;
+            --magenta: #ff00e5;
+            --green: #39ff14;
+            --blue-dark: #0a0e2a;
+            --blue-mid: #111940;
+            --text: #e8eaf6;
+            --text-sub: #9ea7c0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--blue-dark);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+
+        /* ===== HEADER ===== */
+        .lp-header {
+            position: fixed; top: 0; left: 0; right: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 24px;
+            background: rgba(10,14,42,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,229,255,0.1);
+            z-index: 1000;
+        }
+        .lp-header-logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-size: 0.85rem;
+            color: var(--cyan);
+            letter-spacing: 2px;
+            text-decoration: none;
+        }
+        .lp-lang-btn {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: var(--cyan);
+            background: rgba(0,229,255,0.08);
+            border: 1px solid rgba(0,229,255,0.3);
+            border-radius: 3px;
+            padding: 4px 14px;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .policy-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 100px 24px 80px;
+        }
+
+        .policy-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--cyan);
+            margin-bottom: 8px;
+        }
+
+        .policy-date {
+            color: var(--text-sub);
+            font-size: 0.85rem;
+            margin-bottom: 48px;
+        }
+
+        .policy-section {
+            margin-bottom: 40px;
+        }
+
+        .policy-section h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 12px;
+            padding-left: 16px;
+            border-left: 3px solid var(--cyan);
+        }
+
+        .policy-section p,
+        .policy-section ul {
+            color: var(--text-sub);
+            font-size: 0.95rem;
+            line-height: 1.9;
+        }
+
+        .policy-section ul {
+            padding-left: 24px;
+            margin-top: 8px;
+        }
+
+        .policy-section li {
+            margin-bottom: 6px;
+        }
+
+        .policy-section a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+        .policy-section a:hover {
+            text-decoration: underline;
+        }
+
+        .policy-highlight {
+            background: rgba(0,229,255,0.06);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-top: 12px;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            border-top: 1px solid rgba(0,229,255,0.08);
+        }
+        .footer-links { margin-bottom: 12px; }
+        .footer-links a {
+            color: var(--text-sub);
+            text-decoration: none;
+            margin: 0 12px;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--cyan); }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 40px;
+            color: var(--cyan);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border: 1px solid rgba(0,229,255,0.3);
+            padding: 10px 28px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .back-link:hover {
+            background: rgba(0,229,255,0.1);
+        }
+
+        @media (max-width: 600px) {
+            .policy-title { font-size: 1.5rem; }
+            .policy-section h2 { font-size: 1.05rem; }
+            .policy-container { padding: 80px 16px 60px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="lp-header">
+    <a href="index.html" class="lp-header-logo">DIVISOR MASTER</a>
+    <button class="lp-lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
+</header>
+
+<main class="policy-container">
+    <h1 class="policy-title" data-i18n="title">プライバシーポリシー</h1>
+    <p class="policy-date" data-i18n="lastUpdated">最終更新日: 2026年2月10日</p>
+
+    <!-- 1. 運営者 -->
+    <div class="policy-section">
+        <h2 data-i18n="s1Title">1. 運営者情報</h2>
+        <p data-i18n="s1Body">約数マスター（DIVISOR MASTER）は、個人開発者 原崎 大作（以下「運営者」）が提供するゲームアプリおよびWebアプリです。</p>
+    </div>
+
+    <!-- 2. 収集する情報 -->
+    <div class="policy-section">
+        <h2 data-i18n="s2Title">2. 収集する情報</h2>
+        <div class="policy-highlight">
+            <p data-i18n="s2Summary">本アプリは、ユーザーの個人情報を一切収集しません。</p>
+        </div>
+        <p style="margin-top: 16px;" data-i18n="s2Detail">具体的には、以下の情報を収集・送信しません：</p>
+        <ul>
+            <li data-i18n="s2Item1">氏名、メールアドレス、電話番号などの個人情報</li>
+            <li data-i18n="s2Item2">位置情報</li>
+            <li data-i18n="s2Item3">端末の固有識別子（IDFA / IDFV）</li>
+            <li data-i18n="s2Item4">利用状況やアクセスログ</li>
+            <li data-i18n="s2Item5">Cookie やトラッキング技術</li>
+        </ul>
+    </div>
+
+    <!-- 3. ローカルデータ -->
+    <div class="policy-section">
+        <h2 data-i18n="s3Title">3. ローカルデータの保存</h2>
+        <p data-i18n="s3Body">本アプリは、ゲームの進捗データ（スコア、実績、設定など）をお使いの端末内（localStorage）にのみ保存します。このデータは外部サーバーに送信されることはなく、端末上でのみ利用されます。</p>
+    </div>
+
+    <!-- 4. 第三者サービス -->
+    <div class="policy-section">
+        <h2 data-i18n="s4Title">4. 第三者サービス</h2>
+        <p data-i18n="s4Body">本アプリは、広告SDK、アナリティクスツール、その他の第三者サービスを一切使用していません。</p>
+    </div>
+
+    <!-- 5. 子どものプライバシー -->
+    <div class="policy-section">
+        <h2 data-i18n="s5Title">5. お子さまのプライバシー</h2>
+        <p data-i18n="s5Body">本アプリは教育目的のゲームであり、お子さまにも安心してご利用いただけます。個人情報の収集を行わないため、児童オンラインプライバシー保護法（COPPA）およびその他の児童保護規制に準拠しています。</p>
+    </div>
+
+    <!-- 6. データの共有 -->
+    <div class="policy-section">
+        <h2 data-i18n="s6Title">6. データの共有・販売</h2>
+        <p data-i18n="s6Body">本アプリはユーザーデータを収集しないため、第三者へのデータの共有・販売・提供は一切行いません。</p>
+    </div>
+
+    <!-- 7. セキュリティ -->
+    <div class="policy-section">
+        <h2 data-i18n="s7Title">7. セキュリティ</h2>
+        <p data-i18n="s7Body">本アプリはネットワーク通信を行わず、すべてのデータは端末内で完結するため、外部からのデータ漏洩リスクはありません。</p>
+    </div>
+
+    <!-- 8. 変更 -->
+    <div class="policy-section">
+        <h2 data-i18n="s8Title">8. ポリシーの変更</h2>
+        <p data-i18n="s8Body">本ポリシーは必要に応じて更新される場合があります。変更があった場合は、本ページにて最新版を公開します。</p>
+    </div>
+
+    <!-- 9. お問い合わせ -->
+    <div class="policy-section">
+        <h2 data-i18n="s9Title">9. お問い合わせ</h2>
+        <p data-i18n="s9Body" data-i18n-html>本ポリシーに関するご質問は、<a href="support.html">サポートページ</a>よりお問い合わせください。</p>
+    </div>
+
+    <a href="index.html" class="back-link" data-i18n="backToTop" data-i18n-html>&larr; トップページに戻る</a>
+</main>
+
+<footer>
+    <div class="footer-links">
+        <a href="index.html" data-i18n="footerHome">トップ</a>
+        <a href="support.html" data-i18n="footerSupport">サポート</a>
+        <a href="https://apps.apple.com/app/id6758949613" target="_blank" rel="noopener">App Store</a>
+    </div>
+    <span>&copy; 2026 DIVISOR MASTER. All rights reserved.</span>
+</footer>
+
+<script>
+const STRINGS = {
+    ja: {
+        title: 'プライバシーポリシー',
+        lastUpdated: '最終更新日: 2026年2月10日',
+        s1Title: '1. 運営者情報',
+        s1Body: '約数マスター（DIVISOR MASTER）は、個人開発者 原崎 大作（以下「運営者」）が提供するゲームアプリおよびWebアプリです。',
+        s2Title: '2. 収集する情報',
+        s2Summary: '本アプリは、ユーザーの個人情報を一切収集しません。',
+        s2Detail: '具体的には、以下の情報を収集・送信しません：',
+        s2Item1: '氏名、メールアドレス、電話番号などの個人情報',
+        s2Item2: '位置情報',
+        s2Item3: '端末の固有識別子（IDFA / IDFV）',
+        s2Item4: '利用状況やアクセスログ',
+        s2Item5: 'Cookie やトラッキング技術',
+        s3Title: '3. ローカルデータの保存',
+        s3Body: '本アプリは、ゲームの進捗データ（スコア、実績、設定など）をお使いの端末内（localStorage）にのみ保存します。このデータは外部サーバーに送信されることはなく、端末上でのみ利用されます。',
+        s4Title: '4. 第三者サービス',
+        s4Body: '本アプリは、広告SDK、アナリティクスツール、その他の第三者サービスを一切使用していません。',
+        s5Title: '5. お子さまのプライバシー',
+        s5Body: '本アプリは教育目的のゲームであり、お子さまにも安心してご利用いただけます。個人情報の収集を行わないため、児童オンラインプライバシー保護法（COPPA）およびその他の児童保護規制に準拠しています。',
+        s6Title: '6. データの共有・販売',
+        s6Body: '本アプリはユーザーデータを収集しないため、第三者へのデータの共有・販売・提供は一切行いません。',
+        s7Title: '7. セキュリティ',
+        s7Body: '本アプリはネットワーク通信を行わず、すべてのデータは端末内で完結するため、外部からのデータ漏洩リスクはありません。',
+        s8Title: '8. ポリシーの変更',
+        s8Body: '本ポリシーは必要に応じて更新される場合があります。変更があった場合は、本ページにて最新版を公開します。',
+        s9Title: '9. お問い合わせ',
+        s9Body: '本ポリシーに関するご質問は、<a href="support.html">サポートページ</a>よりお問い合わせください。',
+        backToTop: '&larr; トップページに戻る',
+        footerHome: 'トップ',
+        footerSupport: 'サポート',
+    },
+    en: {
+        title: 'Privacy Policy',
+        lastUpdated: 'Last updated: February 10, 2026',
+        s1Title: '1. About Us',
+        s1Body: 'DIVISOR MASTER is a game app and web app provided by independent developer Daisaku Harasaki (hereinafter "the developer").',
+        s2Title: '2. Information We Collect',
+        s2Summary: 'This app does not collect any personal information from users.',
+        s2Detail: 'Specifically, we do not collect or transmit:',
+        s2Item1: 'Personal information such as name, email, or phone number',
+        s2Item2: 'Location data',
+        s2Item3: 'Device identifiers (IDFA / IDFV)',
+        s2Item4: 'Usage data or access logs',
+        s2Item5: 'Cookies or tracking technologies',
+        s3Title: '3. Local Data Storage',
+        s3Body: 'This app stores game progress data (scores, achievements, settings, etc.) only on your device using localStorage. This data is never sent to external servers and is used solely on your device.',
+        s4Title: '4. Third-Party Services',
+        s4Body: 'This app does not use any advertising SDKs, analytics tools, or other third-party services.',
+        s5Title: '5. Children\'s Privacy',
+        s5Body: 'This app is an educational game designed to be safe for children. Since we do not collect any personal information, we comply with the Children\'s Online Privacy Protection Act (COPPA) and other child protection regulations.',
+        s6Title: '6. Data Sharing & Sales',
+        s6Body: 'Since this app does not collect user data, we do not share, sell, or provide any data to third parties.',
+        s7Title: '7. Security',
+        s7Body: 'This app does not perform any network communication. All data is stored locally on your device, eliminating the risk of external data breaches.',
+        s8Title: '8. Changes to This Policy',
+        s8Body: 'This policy may be updated as needed. Any changes will be published on this page.',
+        s9Title: '9. Contact Us',
+        s9Body: 'If you have any questions about this policy, please contact us via our <a href="support.html">Support page</a>.',
+        backToTop: '&larr; Back to Home',
+        footerHome: 'Home',
+        footerSupport: 'Support',
+    }
+};
+
+let currentLang = localStorage.getItem('dm-lang') || 'ja';
+
+function applyLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('dm-lang', lang);
+    document.documentElement.lang = lang === 'ja' ? 'ja' : 'en';
+    document.getElementById('langBtn').textContent = lang === 'ja' ? 'EN' : 'JA';
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (STRINGS[lang][key] !== undefined) {
+            if (el.hasAttribute('data-i18n-html')) {
+                el.innerHTML = STRINGS[lang][key];
+            } else {
+                el.textContent = STRINGS[lang][key];
+            }
+        }
+    });
+}
+
+function toggleLang() {
+    applyLang(currentLang === 'ja' ? 'en' : 'ja');
+}
+
+applyLang(currentLang);
+</script>
+</body>
+</html>

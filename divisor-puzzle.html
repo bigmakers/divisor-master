@@ -1,0 +1,3064 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DIVISOR MASTER - 約数マスター</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sega-blue: #0060A8;
+            --sega-blue-dark: #003366;
+            --sega-blue-light: #1E90FF;
+            --neon-cyan: #00FFFF;
+            --neon-magenta: #FF00FF;
+            --neon-yellow: #FFE600;
+            --neon-green: #39FF14;
+            --danger: #FF3344;
+            --warning: #FF8800;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Outfit', 'Segoe UI', Arial, sans-serif;
+            background: #000a1a;
+            background-image:
+                repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(0,96,168,0.07) 40px, rgba(0,96,168,0.07) 41px),
+                repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(0,96,168,0.07) 40px, rgba(0,96,168,0.07) 41px);
+            color: white;
+            margin: 0;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        /* ========== OVERLAY SYSTEM ========== */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,5,15,0.97);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+        }
+        .overlay.active { display: flex; }
+
+        .overlay-content {
+            background: linear-gradient(180deg, #0a1e3d 0%, #050e1f 100%);
+            padding: 36px 28px;
+            border-radius: 4px;
+            text-align: center;
+            width: 92%;
+            max-width: 480px;
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 0 0 40px rgba(0,255,255,0.2), inset 0 0 30px rgba(0,255,255,0.03);
+            animation: modalIn 0.4s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .overlay-content::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-yellow));
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* ========== TITLE SCREEN ========== */
+        #title-screen {
+            background: radial-gradient(ellipse at center, #0a1e3d 0%, #000a1a 70%);
+        }
+
+        .title-main {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 30px rgba(0,255,255,0.6), 0 0 60px rgba(0,255,255,0.3);
+            margin-bottom: 8px;
+            letter-spacing: 4px;
+            animation: titleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 30px rgba(0,255,255,0.6), 0 0 60px rgba(0,255,255,0.3); }
+            50% { text-shadow: 0 0 50px rgba(0,255,255,0.8), 0 0 100px rgba(0,255,255,0.4); }
+        }
+
+        .title-sub {
+            font-size: 1.1rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 15px rgba(255,230,0,0.5);
+            margin-bottom: 40px;
+            letter-spacing: 6px;
+            font-weight: 700;
+        }
+
+        .title-desc {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .press-start {
+            font-size: 1.1rem;
+            color: var(--neon-green);
+            animation: segaPulse 1.2s ease-in-out infinite;
+            letter-spacing: 3px;
+            cursor: pointer;
+            padding: 16px 48px;
+            border: 2px solid var(--neon-green);
+            background: rgba(57,255,20,0.05);
+            border-radius: 3px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            clip-path: polygon(10px 0%, 100% 0%, calc(100% - 10px) 100%, 0% 100%);
+            padding-left: 26px;
+            padding-right: 26px;
+        }
+
+        .press-start:active {
+            transform: scale(0.95);
+        }
+
+        @keyframes segaPulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 15px rgba(57,255,20,0.4); }
+            50% { opacity: 0.6; box-shadow: 0 0 5px rgba(57,255,20,0.2); }
+        }
+
+        .tutorial-btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.5);
+            background: none;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 3px;
+            padding: 8px 24px;
+            margin-top: 16px;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+        .tutorial-btn:active { opacity: 0.6; }
+
+        .sound-settings {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .sound-toggle-btn {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--neon-cyan);
+            background: rgba(0,255,255,0.08);
+            border: 1px solid rgba(0,255,255,0.4);
+            border-radius: 3px;
+            padding: 8px 18px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+        .sound-toggle-btn:active { transform: scale(0.95); }
+        .sound-toggle-btn.off {
+            color: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.15);
+        }
+
+        .tut-section {
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            background: rgba(0,255,255,0.03);
+            border-left: 3px solid var(--neon-cyan);
+            border-radius: 2px;
+        }
+        .tut-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--neon-yellow);
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+        .tut-body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.7;
+        }
+        .tut-hl {
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        /* ========== MODE SELECT ========== */
+        .mode-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mode-btn {
+            padding: 16px 10px;
+            border: 2px solid rgba(0,255,255,0.2);
+            border-radius: 3px;
+            background: rgba(0,30,60,0.5);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            text-align: center;
+        }
+
+        .mode-btn:active { transform: scale(0.95); }
+
+        .mode-btn.selected {
+            border-color: var(--neon-cyan);
+            background: rgba(0,255,255,0.08);
+            box-shadow: 0 0 20px rgba(0,255,255,0.2);
+        }
+
+        .mode-title {
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 6px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px rgba(0,255,255,0.4);
+        }
+
+        .mode-btn:nth-child(1) .mode-title { color: var(--neon-cyan); }
+        .mode-btn:nth-child(2) .mode-title { color: var(--neon-green); }
+        .mode-btn:nth-child(3) .mode-title { color: var(--neon-magenta); }
+        .mode-btn:nth-child(4) .mode-title { color: var(--neon-yellow); }
+
+        .mode-desc {
+            font-size: 0.6rem;
+            opacity: 0.6;
+            display: block;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.4;
+        }
+
+        .mode-btn.locked {
+            opacity: 0.45;
+            border-color: rgba(255,255,255,0.1);
+            background: rgba(0,10,20,0.6);
+        }
+        .mode-btn.locked .mode-title { color: rgba(255,255,255,0.4) !important; text-shadow: none; }
+        .mode-btn.locked .mode-desc { display: none; }
+        .lock-icon { display: none; font-size: 1.1rem; margin-top: 4px; }
+        .mode-btn.locked .lock-icon { display: block; }
+
+        /* ========== ACHIEVEMENTS ========== */
+        .trophy-btn {
+            font-size: 1.4rem;
+            background: none;
+            border: 1px solid rgba(255,230,0,0.3);
+            border-radius: 50%;
+            width: 44px; height: 44px;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: all 0.2s;
+        }
+        .trophy-btn:active { transform: scale(0.9); }
+
+        .ach-progress {
+            font-size: 0.8rem;
+            color: var(--neon-yellow);
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+        .ach-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .ach-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px;
+            padding: 12px 6px;
+            text-align: center;
+            opacity: 0.4;
+        }
+        .ach-card.unlocked {
+            opacity: 1;
+            border-color: rgba(255,230,0,0.3);
+            background: rgba(255,230,0,0.05);
+        }
+        .ach-emoji { font-size: 1.6rem; margin-bottom: 4px; }
+        .ach-name {
+            font-size: 0.55rem;
+            color: rgba(255,255,255,0.7);
+            font-weight: 700;
+            line-height: 1.3;
+        }
+        .ach-card.unlocked .ach-name { color: var(--neon-yellow); }
+
+        #achievement-toast {
+            position: fixed;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #1a1a3a 0%, #0a1e3d 100%);
+            border: 2px solid var(--neon-yellow);
+            border-radius: 8px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 99999;
+            transition: top 0.4s ease;
+            box-shadow: 0 0 20px rgba(255,230,0,0.3);
+        }
+        #achievement-toast.show { top: 20px; }
+        .ach-toast-emoji { font-size: 1.4rem; }
+        .ach-toast-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--neon-yellow);
+            letter-spacing: 1px;
+        }
+
+        .difficulty-select {
+            margin-bottom: 20px;
+        }
+
+        .difficulty-select label {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .diff-btns {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .diff-btn {
+            width: 44px;
+            height: 36px;
+            border: 2px solid rgba(0,255,255,0.2);
+            border-radius: 3px;
+            background: rgba(0,30,60,0.5);
+            color: rgba(255,255,255,0.6);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .diff-btn.selected {
+            border-color: var(--neon-yellow);
+            background: rgba(255,230,0,0.1);
+            color: var(--neon-yellow);
+            box-shadow: 0 0 10px rgba(255,230,0,0.3);
+        }
+
+        .big-btn {
+            padding: 14px 48px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #000;
+            border: none;
+            border-radius: 3px;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+            padding-left: 24px;
+            padding-right: 24px;
+            background: linear-gradient(180deg, var(--neon-green) 0%, #20CC00 100%);
+            box-shadow: 0 4px 0 #158A00, 0 0 20px rgba(57,255,20,0.3);
+        }
+
+        .big-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #158A00, 0 0 10px rgba(57,255,20,0.3);
+        }
+
+        .big-btn.blue {
+            background: linear-gradient(180deg, var(--sega-blue-light) 0%, var(--sega-blue) 100%);
+            box-shadow: 0 4px 0 var(--sega-blue-dark), 0 0 20px rgba(0,96,168,0.4);
+            color: white;
+        }
+
+        .big-btn.blue:active {
+            box-shadow: 0 0 0 var(--sega-blue-dark);
+        }
+
+        .big-btn.cyan {
+            background: linear-gradient(180deg, var(--neon-cyan) 0%, #0099AA 100%);
+            box-shadow: 0 4px 0 #006677, 0 0 25px rgba(0,255,255,0.4);
+            color: #000;
+        }
+
+        /* ========== GAME SCREEN ========== */
+        #game-screen {
+            display: none;
+            flex-direction: column;
+            height: 100dvh;
+        }
+        #game-screen.active { display: flex; }
+
+        /* HUD Header */
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            padding-top: max(8px, env(safe-area-inset-top));
+            background: linear-gradient(180deg, var(--sega-blue-dark) 0%, #001533 100%);
+            border-bottom: 2px solid var(--neon-cyan);
+            box-shadow: 0 2px 20px rgba(0,255,255,0.3);
+            flex-shrink: 0;
+            min-height: 48px;
+            z-index: 100;
+        }
+
+        .hud-item {
+            text-align: center;
+        }
+
+        .hud-label {
+            font-size: 0.5rem;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .hud-value {
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        #hud-score .hud-value { color: var(--neon-yellow); text-shadow: 0 0 10px rgba(255,230,0,0.5); }
+        #hud-combo .hud-value { color: var(--neon-magenta); text-shadow: 0 0 10px rgba(255,0,255,0.5); }
+        #hud-timer .hud-value { color: var(--neon-cyan); text-shadow: 0 0 10px rgba(0,255,255,0.5); }
+        #hud-level .hud-value { color: var(--neon-green); text-shadow: 0 0 10px rgba(57,255,20,0.5); }
+
+        #hud-timer.urgent .hud-value {
+            color: var(--danger);
+            text-shadow: 0 0 15px rgba(255,51,68,0.6);
+            animation: timerPulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes timerPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Combo popup */
+        #combo-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--neon-magenta);
+            text-shadow: 0 0 30px rgba(255,0,255,0.7);
+            z-index: 500;
+            pointer-events: none;
+            opacity: 0;
+            letter-spacing: 3px;
+        }
+
+        #combo-popup.show {
+            animation: comboPopIn 0.8s ease-out forwards;
+        }
+        /* Combo level escalation */
+        #combo-popup.combo-lv2 {
+            font-size: 3rem;
+            color: #ff6600;
+            text-shadow: 0 0 40px rgba(255,102,0,0.8), 0 0 80px rgba(255,102,0,0.4);
+        }
+        #combo-popup.combo-lv3 {
+            font-size: 3.5rem;
+            color: var(--neon-yellow);
+            text-shadow: 0 0 50px rgba(255,255,0,0.9), 0 0 100px rgba(255,255,0,0.5);
+        }
+        #combo-popup.combo-lv4 {
+            font-size: 4rem;
+            color: #ff00ff;
+            text-shadow: 0 0 60px rgba(255,0,255,1), 0 0 120px rgba(255,0,255,0.6), 0 0 200px rgba(0,255,255,0.3);
+            letter-spacing: 6px;
+        }
+        #combo-popup.combo-lv5 {
+            font-size: 4.5rem;
+            color: #fff;
+            text-shadow: 0 0 40px rgba(255,255,255,1), 0 0 80px rgba(0,255,255,0.8), 0 0 120px rgba(255,0,255,0.8), 0 0 200px rgba(255,255,0,0.5);
+            letter-spacing: 8px;
+        }
+
+        @keyframes comboPopIn {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+            30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            60% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -60%) scale(0.8); opacity: 0; }
+        }
+
+        /* Screen shake for high combos */
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0,0); }
+            10% { transform: translate(-4px, 2px); }
+            20% { transform: translate(4px, -2px); }
+            30% { transform: translate(-3px, -3px); }
+            40% { transform: translate(3px, 3px); }
+            50% { transform: translate(-2px, 1px); }
+            60% { transform: translate(2px, -1px); }
+            70% { transform: translate(-1px, 2px); }
+            80% { transform: translate(1px, -1px); }
+            90% { transform: translate(-1px, 0px); }
+        }
+        @keyframes screenShakeHard {
+            0%, 100% { transform: translate(0,0); }
+            10% { transform: translate(-8px, 4px); }
+            20% { transform: translate(8px, -4px); }
+            30% { transform: translate(-6px, -6px); }
+            40% { transform: translate(6px, 6px); }
+            50% { transform: translate(-4px, 2px); }
+            60% { transform: translate(4px, -2px); }
+            70% { transform: translate(-2px, 4px); }
+            80% { transform: translate(2px, -2px); }
+            90% { transform: translate(-2px, 0px); }
+        }
+        .screen-shake {
+            animation: screenShake 0.3s ease-out;
+        }
+        .screen-shake-hard {
+            animation: screenShakeHard 0.4s ease-out;
+        }
+
+        /* Question area */
+        #question-area {
+            flex-shrink: 0;
+            padding: 12px 16px;
+            text-align: center;
+            background: radial-gradient(ellipse at center, rgba(0,96,168,0.15) 0%, transparent 70%);
+        }
+
+        #question-text {
+            font-size: 0.8rem;
+            color: var(--neon-cyan);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .target-display {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .target-card {
+            width: 80px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--neon-yellow);
+            background: linear-gradient(180deg, #1a2a4a 0%, #0a1428 100%);
+            border: 3px solid var(--neon-yellow);
+            border-radius: 4px;
+            box-shadow: 0 0 30px rgba(255,230,0,0.5), 0 0 60px rgba(255,230,0,0.2);
+            animation: targetGlow 2s ease-in-out infinite;
+            text-shadow: 0 0 15px rgba(255,230,0,0.6);
+        }
+
+        @keyframes targetGlow {
+            0%, 100% { box-shadow: 0 0 30px rgba(255,230,0,0.5), 0 0 60px rgba(255,230,0,0.2); }
+            50% { box-shadow: 0 0 50px rgba(255,230,0,0.7), 0 0 100px rgba(255,230,0,0.3); }
+        }
+
+        .target-symbol {
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.4);
+            font-weight: 900;
+        }
+
+        /* Timer bar */
+        #timer-bar-container {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
+
+        #timer-bar {
+            height: 100%;
+            background: var(--neon-cyan);
+            transition: width 0.1s linear, background-color 0.3s;
+            box-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        #timer-bar.warning { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+        #timer-bar.danger { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+        /* Number grid */
+        #grid-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+            overflow-y: auto;
+        }
+
+        #number-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .num-card {
+            aspect-ratio: 1 / 0.8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #c8d8f0;
+            background: linear-gradient(180deg, #152040 0%, #0a1428 100%);
+            border: 2px solid rgba(0,255,255,0.2);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+        }
+
+        .num-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,255,0.06), transparent);
+            transition: left 0.4s;
+        }
+
+        .num-card:active:not(.matched):not(.wrong-reveal) {
+            transform: scale(0.93);
+        }
+
+        .num-card.selected {
+            border-color: var(--neon-cyan);
+            background: linear-gradient(180deg, #0a2a4a 0%, #051a38 100%);
+            color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0,255,255,0.3), inset 0 0 15px rgba(0,255,255,0.05);
+            transform: translateY(-3px);
+            text-shadow: 0 0 8px rgba(0,255,255,0.5);
+        }
+
+        .num-card.selected::before {
+            left: 100%;
+        }
+
+        .num-card.matched {
+            border-color: var(--neon-green);
+            background: linear-gradient(180deg, #0a2a1a 0%, #051a0f 100%);
+            color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(57,255,20,0.3);
+            text-shadow: 0 0 8px rgba(57,255,20,0.5);
+            pointer-events: none;
+            animation: matchPop 0.3s ease-out;
+        }
+
+        @keyframes matchPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .num-card.wrong-reveal {
+            border-color: var(--danger);
+            background: linear-gradient(180deg, #2a0a0a 0%, #1a0505 100%);
+            color: var(--danger);
+            box-shadow: 0 0 15px rgba(255,51,68,0.3);
+            animation: shake 0.4s;
+            pointer-events: none;
+        }
+
+        .num-card.missed {
+            border-color: var(--neon-green);
+            background: linear-gradient(180deg, #0a2a1a 0%, #051a0f 100%);
+            color: var(--neon-green);
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .num-card.disabled {
+            opacity: 0.2;
+            pointer-events: none;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        /* Stats bar */
+        #stats-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 6px 12px;
+            background: rgba(0,20,40,0.8);
+            border-top: 1px solid rgba(0,255,255,0.1);
+            flex-shrink: 0;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.45rem;
+            color: rgba(255,255,255,0.35);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Submit area */
+        #submit-area {
+            padding: 10px 16px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            background: linear-gradient(180deg, #001533 0%, #000a1a 100%);
+            border-top: 2px solid var(--neon-cyan);
+            box-shadow: 0 -2px 20px rgba(0,255,255,0.2);
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .action-btn {
+            padding: 14px 28px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 3px;
+            color: white;
+            transition: all 0.15s;
+            font-family: 'Outfit', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .action-btn:active:not(:disabled) {
+            transform: translateY(4px);
+        }
+
+        .action-btn:disabled {
+            background: #1a2a3a !important;
+            opacity: 0.4;
+            color: #4a5a6a;
+            box-shadow: none !important;
+        }
+
+        .btn-submit {
+            background: linear-gradient(180deg, var(--neon-yellow) 0%, #CCA800 100%);
+            box-shadow: 0 4px 0 #997D00, 0 0 20px rgba(255,230,0,0.3);
+            color: #000;
+            min-width: 160px;
+            clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+
+        .btn-submit:active:not(:disabled) {
+            box-shadow: 0 0 0 #997D00;
+        }
+
+        .btn-next {
+            background: linear-gradient(180deg, var(--neon-cyan) 0%, #0099AA 100%);
+            box-shadow: 0 4px 0 #006677, 0 0 20px rgba(0,255,255,0.3);
+            color: #000;
+            min-width: 160px;
+            clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+            padding-left: 24px;
+            padding-right: 24px;
+        }
+
+        .btn-submit.hidden, .btn-next.hidden { display: none; }
+
+        .btn-next:active {
+            box-shadow: 0 0 0 #006677;
+        }
+
+        .btn-quit {
+            background: linear-gradient(180deg, #4a5a6a 0%, #2a3a4a 100%);
+            box-shadow: 0 4px 0 #1a2a3a;
+            min-width: 80px;
+            font-size: 0.7rem;
+        }
+
+        .btn-quit:active {
+            box-shadow: 0 0 0 #1a2a3a;
+        }
+
+        /* Answer feedback message */
+        #answer-feedback {
+            text-align: center;
+            padding: 0 16px;
+            flex-shrink: 0;
+            min-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #answer-feedback.show {
+            padding: 10px 16px;
+            min-height: auto;
+        }
+
+        .feedback-msg {
+            font-size: 1.1rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .feedback-msg.correct {
+            color: var(--neon-green);
+            text-shadow: 0 0 15px rgba(57,255,20,0.6);
+        }
+
+        .feedback-msg.wrong {
+            color: var(--danger);
+            text-shadow: 0 0 15px rgba(255,51,68,0.6);
+        }
+
+        .feedback-msg.timeout {
+            color: var(--warning);
+            text-shadow: 0 0 15px rgba(255,136,0,0.6);
+        }
+
+        .feedback-detail {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.6);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.5;
+        }
+
+        .feedback-detail .points {
+            color: var(--neon-yellow);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+        }
+
+        .feedback-answer {
+            font-size: 0.6rem;
+            color: var(--neon-cyan);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin-top: 4px;
+            padding: 4px 8px;
+            background: rgba(0,255,255,0.05);
+            border-radius: 3px;
+            border: 1px solid rgba(0,255,255,0.15);
+            display: inline-block;
+        }
+
+        /* Screen flash */
+        #flash-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 200;
+            opacity: 0;
+        }
+
+        #flash-overlay.correct {
+            background: rgba(57, 255, 20, 0.12);
+            animation: flashFade 0.4s ease-out;
+        }
+
+        #flash-overlay.wrong {
+            background: rgba(255, 51, 68, 0.12);
+            animation: flashFade 0.4s ease-out;
+        }
+
+        @keyframes flashFade {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Particle canvas */
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 300;
+        }
+
+        /* ========== RESULTS / GAMEOVER ========== */
+        .result-title {
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin-bottom: 6px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .result-title.win {
+            color: var(--neon-yellow);
+            text-shadow: 0 0 20px rgba(255,230,0,0.5);
+        }
+
+        .result-title.lose {
+            color: var(--danger);
+            text-shadow: 0 0 20px rgba(255,51,68,0.5);
+        }
+
+        .result-score {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 20px rgba(0,255,255,0.5);
+            margin: 16px 0;
+        }
+
+        .result-stats {
+            background: rgba(0,30,60,0.5);
+            border: 1px solid rgba(0,255,255,0.2);
+            border-radius: 3px;
+            padding: 16px;
+            margin: 16px 0;
+            text-align: left;
+        }
+
+        .result-stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+        }
+
+        .result-stat-row:last-child { border-bottom: none; }
+
+        .result-stat-label {
+            color: rgba(255,255,255,0.5);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .result-stat-value {
+            color: var(--neon-cyan);
+            font-weight: 700;
+        }
+
+        .new-record {
+            color: var(--neon-yellow);
+            font-size: 0.65rem;
+            animation: segaPulse 1s ease-in-out infinite;
+            margin-left: 6px;
+            letter-spacing: 1px;
+        }
+
+        .result-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* Level up overlay */
+        #levelup-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 800;
+            pointer-events: none;
+        }
+
+        #levelup-overlay.show {
+            display: flex;
+        }
+
+        .levelup-text {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--neon-green);
+            text-shadow: 0 0 30px rgba(57,255,20,0.7);
+            letter-spacing: 4px;
+            animation: levelUpAnim 1.5s ease-out forwards;
+        }
+
+        @keyframes levelUpAnim {
+            0% { transform: scale(0.3); opacity: 0; }
+            20% { transform: scale(1.3); opacity: 1; }
+            40% { transform: scale(1); opacity: 1; }
+            80% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(1.5) translateY(-30px); opacity: 0; }
+        }
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 480px) {
+            .title-main { font-size: 1.8rem; letter-spacing: 2px; }
+            .title-sub { font-size: 0.85rem; letter-spacing: 3px; }
+            .overlay-content { padding: 24px 16px; }
+            .mode-grid { gap: 8px; }
+            .mode-btn { padding: 12px 8px; }
+            .mode-title { font-size: 0.75rem; }
+            .target-card { width: 64px; height: 80px; font-size: 1.8rem; }
+            #number-grid { gap: 6px; }
+            .num-card { font-size: 1.2rem; }
+            .hud-value { font-size: 0.85rem; }
+            .hud-label { font-size: 0.4rem; }
+        }
+
+        @media (min-width: 600px) {
+            #number-grid {
+                grid-template-columns: repeat(6, 1fr);
+                max-width: 500px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            #question-area { padding: 6px 12px; }
+            .target-card { width: 56px; height: 70px; font-size: 1.6rem; }
+            #question-text { font-size: 0.7rem; margin-bottom: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Flash overlay -->
+    <div id="flash-overlay"></div>
+
+    <!-- Particle canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Combo popup -->
+    <div id="combo-popup"></div>
+
+    <!-- Level up overlay -->
+    <div id="levelup-overlay">
+        <div class="levelup-text" id="levelup-text"></div>
+    </div>
+
+    <!-- Achievement Toast -->
+    <div id="achievement-toast"></div>
+
+    <!-- ========== TITLE SCREEN ========== -->
+    <div class="overlay active" id="title-screen">
+        <div class="title-main">DIVISOR</div>
+        <div class="title-main" style="font-size:1.4rem; margin-bottom: 4px;">MASTER</div>
+        <div class="title-sub" data-i18n="titleSub">約 数 マ ス タ ー</div>
+        <div class="title-desc" data-i18n="titleDesc" data-i18n-html>約数を瞬時に見抜け！<br>スピードと正確さを鍛えるアーケードパズル</div>
+        <button class="press-start" onclick="showModeSelect()">PRESS START</button>
+        <div class="sound-settings">
+            <button class="sound-toggle-btn" id="bgm-toggle" onclick="initAudio(); toggleBgm()">BGM: ON</button>
+            <button class="sound-toggle-btn" id="sfx-toggle" onclick="initAudio(); toggleSfx()">SFX: ON</button>
+            <button class="sound-toggle-btn" id="lang-toggle" onclick="toggleLang()">EN</button>
+        </div>
+        <button class="tutorial-btn" data-i18n="howToPlay" onclick="showScreen('tutorial-screen')">HOW TO PLAY</button>
+        <button class="trophy-btn" onclick="showAchievementsScreen()">&#127942;</button>
+    </div>
+
+    <!-- ========== TUTORIAL SCREEN ========== -->
+    <div class="overlay" id="tutorial-screen">
+        <div class="overlay-content" style="max-height:85vh; overflow-y:auto; text-align:left;">
+            <div style="font-size:1rem; color:var(--neon-cyan); font-weight:900; margin-bottom:16px; letter-spacing:2px; text-align:center;" data-i18n="howToPlay">HOW TO PLAY</div>
+
+            <div class="tut-section">
+                <div class="tut-title" data-i18n="tutWhatIs">約数とは？</div>
+                <div class="tut-body" data-i18n="tutWhatIsBody" data-i18n-html>ある数を割り切れる数のこと。<br>例: <span class="tut-hl">12の約数</span> → 1, 2, 3, 4, 6, 12</div>
+            </div>
+
+            <div class="tut-section">
+                <div class="tut-title" data-i18n="tutPair">PAIR モード</div>
+                <div class="tut-body" data-i18n="tutPairBody" data-i18n-html>掛けてターゲットになる<span class="tut-hl">2つの数のペア</span>を見つけよう。<br>例: ターゲット24 → <span class="tut-hl">4 × 6</span> や <span class="tut-hl">3 × 8</span></div>
+            </div>
+
+            <div class="tut-section">
+                <div class="tut-title" data-i18n="tutDivisor">DIVISOR モード</div>
+                <div class="tut-body" data-i18n="tutDivisorBody" data-i18n-html>ターゲットの<span class="tut-hl">約数をすべて</span>選ぼう。<br>選んだ数が正解数に達すると自動で判定されるよ。</div>
+            </div>
+
+            <div class="tut-section">
+                <div class="tut-title" data-i18n="tutCommon">COMMON モード</div>
+                <div class="tut-body" data-i18n="tutCommonBody" data-i18n-html>2つの数の<span class="tut-hl">公約数</span>（共通の約数）をすべて選ぼう。<br>例: 12と18 → <span class="tut-hl">1, 2, 3, 6</span></div>
+            </div>
+
+            <div class="tut-section">
+                <div class="tut-title" data-i18n="tutTime">TIME ATK モード</div>
+                <div class="tut-body" data-i18n="tutTimeBody" data-i18n-html><span class="tut-hl">60秒間</span>でどんどん問題を解こう！<br>ランダムに色々な問題が出るよ。</div>
+            </div>
+
+            <div class="tut-section">
+                <div class="tut-title" data-i18n="tutScore">スコアのコツ</div>
+                <div class="tut-body" data-i18n="tutScoreBody" data-i18n-html>
+                    ・連続正解で<span class="tut-hl">コンボ倍率UP</span><br>
+                    ・速く答えるほど<span class="tut-hl">高得点</span><br>
+                    ・5問正解でレベルアップ、数の範囲が広がる
+                </div>
+            </div>
+
+            <div style="text-align:center; margin-top:20px;">
+                <button class="big-btn" data-i18n="tutBack" onclick="showScreen('title-screen')">もどる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== ACHIEVEMENTS SCREEN ========== -->
+    <div class="overlay" id="achievements-screen">
+        <div class="overlay-content" style="max-height:85vh; overflow-y:auto;">
+            <div style="font-size:1rem; color:var(--neon-yellow); font-weight:900; margin-bottom:16px; letter-spacing:2px;" data-i18n="achievements">実績</div>
+            <div id="ach-list"></div>
+            <div style="text-align:center; margin-top:20px;">
+                <button class="big-btn" data-i18n="tutBack" onclick="showScreen('title-screen')">もどる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== MODE SELECT ========== -->
+    <div class="overlay" id="mode-screen">
+        <div class="overlay-content">
+            <div style="font-size:1rem; color:var(--neon-cyan); font-weight:900; margin-bottom:20px; letter-spacing:2px;" data-i18n="selectMode">SELECT MODE</div>
+
+            <div class="mode-grid">
+                <button class="mode-btn selected" data-mode="pair" onclick="selectMode(this, 'pair')">
+                    <span class="mode-title">PAIR</span>
+                    <span class="mode-desc" data-i18n="modePairDesc">掛けてターゲットになるペアを探せ</span>
+                </button>
+                <button class="mode-btn" data-mode="normal" onclick="selectMode(this, 'normal')">
+                    <span class="mode-title">DIVISOR</span>
+                    <span class="mode-desc" data-i18n="modeDivisorDesc">約数をすべて選べ</span>
+                    <span class="lock-icon">&#128274;</span>
+                </button>
+                <button class="mode-btn" data-mode="common" onclick="selectMode(this, 'common')">
+                    <span class="mode-title">COMMON</span>
+                    <span class="mode-desc" data-i18n="modeCommonDesc">2つの数の公約数を見つけろ</span>
+                    <span class="lock-icon">&#128274;</span>
+                </button>
+                <button class="mode-btn" data-mode="timeattack" onclick="selectMode(this, 'timeattack')">
+                    <span class="mode-title">TIME ATK</span>
+                    <span class="mode-desc" data-i18n="modeTimeDesc">60秒間で何問解ける？</span>
+                    <span class="lock-icon">&#128274;</span>
+                </button>
+            </div>
+
+            <div class="difficulty-select">
+                <label>DIFFICULTY</label>
+                <div class="diff-btns">
+                    <button class="diff-btn selected" data-diff="1" onclick="selectDiff(this, 1)">1</button>
+                    <button class="diff-btn" data-diff="2" onclick="selectDiff(this, 2)">2</button>
+                    <button class="diff-btn" data-diff="3" onclick="selectDiff(this, 3)">3</button>
+                    <button class="diff-btn" data-diff="4" onclick="selectDiff(this, 4)">4</button>
+                    <button class="diff-btn" data-diff="5" onclick="selectDiff(this, 5)">5</button>
+                </div>
+            </div>
+
+            <button class="big-btn" onclick="startGame()">GAME START</button>
+        </div>
+    </div>
+
+    <!-- ========== RESULTS SCREEN ========== -->
+    <div class="overlay" id="results-screen">
+        <div class="overlay-content">
+            <div class="result-title" id="result-title">RESULT</div>
+            <div class="result-score" id="result-score">0</div>
+            <div class="result-stats" id="result-stats"></div>
+            <div class="result-buttons">
+                <button class="big-btn blue" onclick="showModeSelect()">MODE SELECT</button>
+                <button class="big-btn" onclick="restartGame()">RETRY</button>
+                <button class="big-btn" style="background: linear-gradient(180deg, #4a5a6a 0%, #2a3a4a 100%); box-shadow: 0 4px 0 #1a2a3a;" onclick="showScreen('title-screen')">HOME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== PURCHASE MODAL ========== -->
+    <div class="overlay" id="purchase-modal">
+        <div class="overlay-content" style="max-width:360px;">
+            <div style="font-size:2rem; margin-bottom:12px;">&#128274;</div>
+            <div style="font-size:1rem; color:var(--neon-cyan); font-weight:900; margin-bottom:8px; letter-spacing:2px;" data-i18n="modeLockedTitle">このモードは有料です</div>
+            <div style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin-bottom:24px;" data-i18n="modeLockedDesc">DIVISOR / COMMON / TIME ATK をアンロック</div>
+            <button class="big-btn" onclick="doPurchase()" data-i18n="modeLockedBuy" style="margin-bottom:10px;">購入する（¥480）</button>
+            <button class="big-btn blue" onclick="doRestore()" data-i18n="modeLockedRestore" style="margin-bottom:10px;">購入を復元</button>
+            <button class="big-btn" onclick="hidePurchaseModal()" data-i18n="modeLockedCancel" style="background: linear-gradient(180deg, #4a5a6a 0%, #2a3a4a 100%); box-shadow: 0 4px 0 #1a2a3a;">キャンセル</button>
+        </div>
+    </div>
+
+    <!-- ========== GAME SCREEN ========== -->
+    <div id="game-screen">
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-item" id="hud-score">
+                <div class="hud-label">SCORE</div>
+                <div class="hud-value" id="score-display">0</div>
+            </div>
+            <div class="hud-item" id="hud-combo">
+                <div class="hud-label">COMBO</div>
+                <div class="hud-value" id="combo-display">x0</div>
+            </div>
+            <div class="hud-item" id="hud-timer">
+                <div class="hud-label">TIME</div>
+                <div class="hud-value" id="timer-display">15</div>
+            </div>
+            <div class="hud-item" id="hud-level">
+                <div class="hud-label">LEVEL</div>
+                <div class="hud-value" id="level-display">1</div>
+            </div>
+        </div>
+
+        <!-- Timer bar -->
+        <div id="timer-bar-container">
+            <div id="timer-bar" style="width:100%"></div>
+        </div>
+
+        <!-- Question -->
+        <div id="question-area">
+            <div id="question-text">FIND ALL DIVISORS</div>
+            <div class="target-display" id="target-display"></div>
+        </div>
+
+        <!-- Grid -->
+        <div id="grid-area">
+            <div id="number-grid"></div>
+        </div>
+
+        <!-- Stats -->
+        <div id="stats-bar">
+            <div class="stat-item">
+                <div class="stat-label">ACCURACY</div>
+                <div class="stat-value" id="stat-accuracy">--%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">STREAK</div>
+                <div class="stat-value" id="stat-streak">0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">AVG TIME</div>
+                <div class="stat-value" id="stat-avgtime">--s</div>
+            </div>
+        </div>
+
+        <!-- Answer feedback -->
+        <div id="answer-feedback"></div>
+
+        <!-- Submit -->
+        <div id="submit-area">
+            <button class="action-btn btn-quit" id="btn-quit" onclick="confirmQuit()">QUIT</button>
+            <button class="action-btn btn-submit" id="btn-submit" onclick="submitAnswer()">SUBMIT</button>
+            <button class="action-btn btn-next hidden" id="btn-next" onclick="nextQuestion()">NEXT</button>
+        </div>
+    </div>
+
+    <script>
+    // ========== I18N SYSTEM ==========
+    let currentLang = 'ja';
+
+    const STRINGS = {
+        ja: {
+            titleSub: '約 数 マ ス タ ー',
+            titleDesc: '約数を瞬時に見抜け！<br>スピードと正確さを鍛えるアーケードパズル',
+            howToPlay: 'HOW TO PLAY',
+            tutWhatIs: '約数とは？',
+            tutWhatIsBody: 'ある数を割り切れる数のこと。<br>例: <span class="tut-hl">12の約数</span> → 1, 2, 3, 4, 6, 12',
+            tutPair: 'PAIR モード',
+            tutPairBody: '掛けてターゲットになる<span class="tut-hl">2つの数のペア</span>を見つけよう。<br>例: ターゲット24 → <span class="tut-hl">4 × 6</span> や <span class="tut-hl">3 × 8</span>',
+            tutDivisor: 'DIVISOR モード',
+            tutDivisorBody: 'ターゲットの<span class="tut-hl">約数をすべて</span>選ぼう。<br>選んだ数が正解数に達すると自動で判定されるよ。',
+            tutCommon: 'COMMON モード',
+            tutCommonBody: '2つの数の<span class="tut-hl">公約数</span>（共通の約数）をすべて選ぼう。<br>例: 12と18 → <span class="tut-hl">1, 2, 3, 6</span>',
+            tutTime: 'TIME ATK モード',
+            tutTimeBody: '<span class="tut-hl">60秒間</span>でどんどん問題を解こう！<br>ランダムに色々な問題が出るよ。',
+            tutScore: 'スコアのコツ',
+            tutScoreBody: '・連続正解で<span class="tut-hl">コンボ倍率UP</span><br>・速く答えるほど<span class="tut-hl">高得点</span><br>・5問正解でレベルアップ、数の範囲が広がる',
+            tutBack: 'もどる',
+            selectMode: 'SELECT MODE',
+            modePairDesc: '掛けてターゲットになるペアを探せ',
+            modeDivisorDesc: '約数をすべて選べ',
+            modeCommonDesc: '2つの数の公約数を見つけろ',
+            modeTimeDesc: '60秒間で何問解ける？',
+            questionPair: (n) => '掛けると ' + n + ' になるペアを見つけろ！',
+            questionDivisor: (n) => n + ' の約数をすべて選べ！',
+            questionCommon: (a, b) => a + ' と ' + b + ' の公約数を選べ！',
+            feedbackCorrect: 'CORRECT!',
+            feedbackMiss: 'MISS...',
+            feedbackTimeUp: 'TIME UP!',
+            feedbackCommon: '公約数: ',
+            feedbackDivisors: (n) => n + ' の約数: ',
+            modeLockedTitle: 'このモードは有料です',
+            modeLockedDesc: 'DIVISOR / COMMON / TIME ATK をアンロック',
+            modeLockedBuy: '購入する（¥480）',
+            modeLockedRestore: '購入を復元',
+            modeLockedCancel: 'キャンセル',
+            purchaseSuccess: '購入完了！全モード解放！',
+            restoreSuccess: '復元完了！',
+            purchaseError: '購入に失敗しました',
+            achievements: '実績',
+            ach_firstGame: 'はじめの一歩',
+            ach_firstPerfect: 'パーフェクト',
+            ach_combo5: 'コンボマスター',
+            ach_combo10: 'コンボキング',
+            ach_combo20: 'コンボ伝説',
+            ach_streak10: '連勝街道',
+            ach_streak20: '無敵',
+            ach_score1k: 'スコアハンター',
+            ach_score5k: 'スコアマスター',
+            ach_score10k: 'スコアキング',
+            ach_speedDemon: '神速',
+            ach_allModes: 'オールラウンダー',
+            ach_level5: '頂点',
+            ach_avgSpeed2: '高速回答者',
+            ach_master: '約数マスター',
+        },
+        en: {
+            titleSub: 'DIVISOR MASTER',
+            titleDesc: 'Spot divisors instantly!<br>An arcade puzzle to train speed & accuracy',
+            howToPlay: 'HOW TO PLAY',
+            tutWhatIs: 'What is a Divisor?',
+            tutWhatIsBody: 'A number that divides evenly into another.<br>Ex: <span class="tut-hl">Divisors of 12</span> → 1, 2, 3, 4, 6, 12',
+            tutPair: 'PAIR Mode',
+            tutPairBody: 'Find <span class="tut-hl">two numbers</span> that multiply to the target.<br>Ex: Target 24 → <span class="tut-hl">4 × 6</span> or <span class="tut-hl">3 × 8</span>',
+            tutDivisor: 'DIVISOR Mode',
+            tutDivisorBody: 'Select <span class="tut-hl">all divisors</span> of the target.<br>Auto-judges when you reach the correct count.',
+            tutCommon: 'COMMON Mode',
+            tutCommonBody: 'Select all <span class="tut-hl">common divisors</span> of two numbers.<br>Ex: 12 & 18 → <span class="tut-hl">1, 2, 3, 6</span>',
+            tutTime: 'TIME ATK Mode',
+            tutTimeBody: 'Solve as many as you can in <span class="tut-hl">60 seconds</span>!<br>Random mix of question types.',
+            tutScore: 'Scoring Tips',
+            tutScoreBody: '- Consecutive correct = <span class="tut-hl">combo multiplier UP</span><br>- Faster answers = <span class="tut-hl">more points</span><br>- Level up every 5 correct, numbers get bigger',
+            tutBack: 'BACK',
+            selectMode: 'SELECT MODE',
+            modePairDesc: 'Find pairs that multiply to the target',
+            modeDivisorDesc: 'Select all divisors',
+            modeCommonDesc: 'Find common divisors of two numbers',
+            modeTimeDesc: 'How many in 60 seconds?',
+            questionPair: (n) => 'Find a pair that multiplies to ' + n + '!',
+            questionDivisor: (n) => 'Select all divisors of ' + n + '!',
+            questionCommon: (a, b) => 'Select common divisors of ' + a + ' & ' + b + '!',
+            feedbackCorrect: 'CORRECT!',
+            feedbackMiss: 'MISS...',
+            feedbackTimeUp: 'TIME UP!',
+            feedbackCommon: 'Common divisors: ',
+            feedbackDivisors: (n) => 'Divisors of ' + n + ': ',
+            modeLockedTitle: 'This mode is locked',
+            modeLockedDesc: 'Unlock DIVISOR / COMMON / TIME ATK',
+            modeLockedBuy: 'Purchase (¥480)',
+            modeLockedRestore: 'Restore Purchase',
+            modeLockedCancel: 'Cancel',
+            purchaseSuccess: 'Purchased! All modes unlocked!',
+            restoreSuccess: 'Restore complete!',
+            purchaseError: 'Purchase failed',
+            achievements: 'Achievements',
+            ach_firstGame: 'First Step',
+            ach_firstPerfect: 'Perfect',
+            ach_combo5: 'Combo Master',
+            ach_combo10: 'Combo King',
+            ach_combo20: 'Combo Legend',
+            ach_streak10: 'Win Streak',
+            ach_streak20: 'Invincible',
+            ach_score1k: 'Score Hunter',
+            ach_score5k: 'Score Master',
+            ach_score10k: 'Score King',
+            ach_speedDemon: 'Speed Demon',
+            ach_allModes: 'All-Rounder',
+            ach_level5: 'The Summit',
+            ach_avgSpeed2: 'Fast Thinker',
+            ach_master: 'Divisor Master',
+        }
+    };
+
+    function t(key, ...args) {
+        const val = STRINGS[currentLang]?.[key] ?? STRINGS['ja'][key] ?? key;
+        if (typeof val === 'function') return val(...args);
+        return val;
+    }
+
+    function applyLanguage() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.dataset.i18n;
+            const text = t(key);
+            if (el.hasAttribute('data-i18n-html')) {
+                el.innerHTML = text;
+            } else {
+                el.textContent = text;
+            }
+        });
+        const langBtn = document.getElementById('lang-toggle');
+        if (langBtn) langBtn.textContent = currentLang === 'ja' ? 'EN' : 'JA';
+    }
+
+    function toggleLang() {
+        currentLang = currentLang === 'ja' ? 'en' : 'ja';
+        saveSettings();
+        applyLanguage();
+        playSound('select');
+    }
+
+    // ========== MODE UNLOCK (IAP) ==========
+    const IAP_STORAGE_KEY = 'divisor-master-iap';
+    let modesUnlocked = false;
+
+    function loadPurchaseState() {
+        try {
+            const d = JSON.parse(localStorage.getItem(IAP_STORAGE_KEY));
+            if (d && d.unlocked) modesUnlocked = true;
+        } catch {}
+    }
+
+    function savePurchaseState(v) {
+        modesUnlocked = v;
+        localStorage.setItem(IAP_STORAGE_KEY, JSON.stringify({ unlocked: v }));
+    }
+
+    function isModeLocked(mode) {
+        return !modesUnlocked && mode !== 'pair';
+    }
+
+    function updateModeButtons() {
+        document.querySelectorAll('.mode-btn').forEach(btn => {
+            const mode = btn.dataset.mode;
+            if (isModeLocked(mode)) {
+                btn.classList.add('locked');
+            } else {
+                btn.classList.remove('locked');
+            }
+        });
+    }
+
+    function showPurchaseModal() {
+        document.getElementById('purchase-modal').classList.add('active');
+    }
+
+    function hidePurchaseModal() {
+        document.getElementById('purchase-modal').classList.remove('active');
+    }
+
+    function doPurchase() {
+        // Native StoreKit integration placeholder
+        // For now, simulate purchase for testing
+        if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins.StoreKit) {
+            window.Capacitor.Plugins.StoreKit.purchase().then(r => {
+                if (r.purchased) {
+                    savePurchaseState(true);
+                    updateModeButtons();
+                    hidePurchaseModal();
+                    flashScreen('correct');
+                    playSound('levelup');
+                }
+            }).catch(() => alert(t('purchaseError')));
+        } else {
+            // Browser: direct unlock for testing
+            savePurchaseState(true);
+            updateModeButtons();
+            hidePurchaseModal();
+            flashScreen('correct');
+            playSound('levelup');
+        }
+    }
+
+    function doRestore() {
+        if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins.StoreKit) {
+            window.Capacitor.Plugins.StoreKit.restorePurchases().then(r => {
+                if (r.purchased) {
+                    savePurchaseState(true);
+                    updateModeButtons();
+                    hidePurchaseModal();
+                    alert(t('restoreSuccess'));
+                } else {
+                    alert(t('purchaseError'));
+                }
+            }).catch(() => alert(t('purchaseError')));
+        } else {
+            alert(t('purchaseError'));
+        }
+    }
+
+    // ========== ACHIEVEMENTS SYSTEM ==========
+    const ACH_KEY = 'divisor-master-achievements';
+    const MODES_KEY = 'divisor-master-played-modes';
+    let achievements = {};
+    let playedModes = {};
+
+    const ACHIEVEMENT_DEFS = [
+        { id: 'firstGame',    emoji: '\u{1F3AE}' },
+        { id: 'firstPerfect', emoji: '\u2728' },
+        { id: 'combo5',       emoji: '\u{1F525}' },
+        { id: 'combo10',      emoji: '\u{1F4A5}' },
+        { id: 'combo20',      emoji: '\u{1F30B}' },
+        { id: 'streak10',     emoji: '\u26A1' },
+        { id: 'streak20',     emoji: '\u{1F3C6}' },
+        { id: 'score1k',      emoji: '\u{1F4B0}' },
+        { id: 'score5k',      emoji: '\u{1F48E}' },
+        { id: 'score10k',     emoji: '\u{1F451}' },
+        { id: 'speedDemon',   emoji: '\u23F1\uFE0F' },
+        { id: 'allModes',     emoji: '\u{1F3AF}' },
+        { id: 'level5',       emoji: '\u{1F31F}' },
+        { id: 'avgSpeed2',    emoji: '\u{1F680}' },
+        { id: 'master',       emoji: '\u{1F3C5}' },
+    ];
+
+    function loadAchievements() {
+        try { achievements = JSON.parse(localStorage.getItem(ACH_KEY)) || {}; } catch { achievements = {}; }
+        try { playedModes = JSON.parse(localStorage.getItem(MODES_KEY)) || {}; } catch { playedModes = {}; }
+    }
+
+    function saveAchievements() {
+        localStorage.setItem(ACH_KEY, JSON.stringify(achievements));
+        localStorage.setItem(MODES_KEY, JSON.stringify(playedModes));
+    }
+
+    function unlockAchievement(id) {
+        if (achievements[id]) return;
+        achievements[id] = true;
+        saveAchievements();
+        showAchievementToast(id);
+    }
+
+    function showAchievementToast(id) {
+        const def = ACHIEVEMENT_DEFS.find(a => a.id === id);
+        if (!def) return;
+        const toast = document.getElementById('achievement-toast');
+        toast.innerHTML = '<span class="ach-toast-emoji">' + def.emoji + '</span> <span class="ach-toast-text">' + t('ach_' + id) + '</span>';
+        toast.classList.add('show');
+        playSound('levelup');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function checkAchievementsOnCorrect(responseTime) {
+        if (responseTime < 1000) unlockAchievement('speedDemon');
+        if (GS.combo >= 5) unlockAchievement('combo5');
+        if (GS.combo >= 10) unlockAchievement('combo10');
+        if (GS.combo >= 20) unlockAchievement('combo20');
+        if (GS.streak >= 10) unlockAchievement('streak10');
+        if (GS.streak >= 20) unlockAchievement('streak20');
+    }
+
+    function checkAchievementsOnEnd() {
+        unlockAchievement('firstGame');
+        playedModes[GS.mode] = true;
+        saveAchievements();
+        if (GS.questionsAnswered >= 10 && GS.totalWrong === 0) unlockAchievement('firstPerfect');
+        if (GS.score >= 1000) unlockAchievement('score1k');
+        if (GS.score >= 5000) unlockAchievement('score5k');
+        if (GS.score >= 10000) unlockAchievement('score10k');
+        if (GS.maxCombo >= 5) unlockAchievement('combo5');
+        if (GS.maxCombo >= 10) unlockAchievement('combo10');
+        if (GS.maxCombo >= 20) unlockAchievement('combo20');
+        if (GS.bestStreak >= 10) unlockAchievement('streak10');
+        if (GS.bestStreak >= 20) unlockAchievement('streak20');
+        if (GS.level >= 5) unlockAchievement('level5');
+        if (GS.questionsAnswered >= 10) {
+            const avg = GS.totalResponseTime / GS.questionsAnswered / 1000;
+            if (avg <= 2) unlockAchievement('avgSpeed2');
+        }
+        if (GS.level >= 5 && GS.totalWrong === 0 && GS.questionsAnswered >= 10) unlockAchievement('master');
+        if (playedModes.pair && playedModes.normal && playedModes.common && playedModes.timeattack) unlockAchievement('allModes');
+    }
+
+    function showAchievementsScreen() {
+        const container = document.getElementById('ach-list');
+        const count = Object.keys(achievements).length;
+        let html = '<div class="ach-progress">' + count + ' / ' + ACHIEVEMENT_DEFS.length + '</div>';
+        html += '<div class="ach-grid">';
+        ACHIEVEMENT_DEFS.forEach(def => {
+            const unlocked = achievements[def.id];
+            html += '<div class="ach-card' + (unlocked ? ' unlocked' : '') + '">';
+            html += '<div class="ach-emoji">' + (unlocked ? def.emoji : '\u{1F512}') + '</div>';
+            html += '<div class="ach-name">' + (unlocked ? t('ach_' + def.id) : '???') + '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        showScreen('achievements-screen');
+    }
+
+    // ========== SOUND SETTINGS ==========
+    const SETTINGS_KEY = 'divisor-master-settings';
+    let sfxEnabled = true;
+    let bgmEnabled = true;
+
+    function loadSettings() {
+        try {
+            const s = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+            if (s) {
+                if (s.sfx === false) sfxEnabled = false;
+                if (s.bgm === false) bgmEnabled = false;
+                if (s.lang) currentLang = s.lang;
+            }
+        } catch {}
+        updateSettingsUI();
+    }
+
+    function saveSettings() {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({ sfx: sfxEnabled, bgm: bgmEnabled, lang: currentLang }));
+    }
+
+    function toggleSfx() {
+        sfxEnabled = !sfxEnabled;
+        saveSettings();
+        updateSettingsUI();
+        if (sfxEnabled) playSound('select');
+    }
+
+    function toggleBgm() {
+        bgmEnabled = !bgmEnabled;
+        saveSettings();
+        updateSettingsUI();
+        if (bgmEnabled) {
+            startBGM();
+        } else {
+            stopBGM();
+        }
+    }
+
+    function updateSettingsUI() {
+        const sfxBtn = document.getElementById('sfx-toggle');
+        const bgmBtn = document.getElementById('bgm-toggle');
+        if (sfxBtn) {
+            sfxBtn.textContent = 'SFX: ' + (sfxEnabled ? 'ON' : 'OFF');
+            sfxBtn.classList.toggle('off', !sfxEnabled);
+        }
+        if (bgmBtn) {
+            bgmBtn.textContent = 'BGM: ' + (bgmEnabled ? 'ON' : 'OFF');
+            bgmBtn.classList.toggle('off', !bgmEnabled);
+        }
+    }
+
+    // ========== SOUND SYSTEM ==========
+    let audioCtx = null;
+
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    // ========== BGM SYSTEM ==========
+    let bgmInterval = null;
+    let bgmGainNode = null;
+    let bgmPlaying = false;
+
+    let bgmPadOscs = [];
+
+    function startBGM() {
+        if (!audioCtx || !bgmEnabled || bgmPlaying) return;
+        bgmPlaying = true;
+
+        bgmGainNode = audioCtx.createGain();
+        bgmGainNode.gain.value = 0.06;
+        bgmGainNode.connect(audioCtx.destination);
+
+        // House music: BPM 126, four-on-the-floor
+        const bpm = 126;
+        const beat = 60 / bpm;
+        let step = 0;
+
+        // Patterns (16 steps = 2 bars)
+        const kick  = [1,0,0,0, 1,0,0,0, 1,0,0,0, 1,0,0,0];
+        const hihat = [0,0,1,0, 0,0,1,0, 0,0,1,0, 0,0,1,0];
+        const clap  = [0,0,0,0, 1,0,0,0, 0,0,0,0, 1,0,0,0];
+        const bass  = [55,0,0,55, 0,0,82,0, 55,0,0,55, 0,82,0,0];
+        const chord = [0,0,0,0, 0,1,0,0, 0,0,0,0, 0,1,0,0];
+
+        // Pad: sustained ambient chord (A3 + C4 + E4)
+        const padFreqs = [220, 261.6, 329.6];
+        bgmPadOscs = [];
+        const padGain = audioCtx.createGain();
+        padGain.gain.value = 0.03;
+        const padFilter = audioCtx.createBiquadFilter();
+        padFilter.type = 'lowpass';
+        padFilter.frequency.value = 800;
+        padFilter.Q.value = 1;
+        padGain.connect(bgmGainNode);
+        padFilter.connect(padGain);
+        padFreqs.forEach(f => {
+            const o = audioCtx.createOscillator();
+            o.type = 'sawtooth';
+            o.frequency.value = f;
+            o.connect(padFilter);
+            o.start();
+            bgmPadOscs.push(o);
+        });
+
+        function scheduleBeat() {
+            if (!bgmPlaying || !bgmEnabled) return;
+            const now = audioCtx.currentTime;
+            const idx = step % 16;
+
+            // Kick: four-on-the-floor, deep 808-style
+            if (kick[idx]) {
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.connect(g); g.connect(bgmGainNode);
+                o.frequency.setValueAtTime(150, now);
+                o.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+                g.gain.setValueAtTime(0.7, now);
+                g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                o.start(now);
+                o.stop(now + 0.12);
+            }
+
+            // Hi-hat: offbeat
+            if (hihat[idx]) {
+                const bufLen = Math.floor(audioCtx.sampleRate * 0.02);
+                const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+                const n = audioCtx.createBufferSource();
+                n.buffer = buf;
+                const hf = audioCtx.createBiquadFilter();
+                hf.type = 'highpass'; hf.frequency.value = 8000;
+                const hg = audioCtx.createGain();
+                hg.gain.setValueAtTime(0.25, now);
+                hg.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+                n.connect(hf); hf.connect(hg); hg.connect(bgmGainNode);
+                n.start(now);
+                n.stop(now + 0.02);
+            }
+
+            // Clap: beats 2 & 4
+            if (clap[idx]) {
+                const bufLen = Math.floor(audioCtx.sampleRate * 0.04);
+                const buf = audioCtx.createBuffer(1, bufLen, audioCtx.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+                const n = audioCtx.createBufferSource();
+                n.buffer = buf;
+                const cf = audioCtx.createBiquadFilter();
+                cf.type = 'bandpass'; cf.frequency.value = 2000; cf.Q.value = 1.5;
+                const cg = audioCtx.createGain();
+                cg.gain.setValueAtTime(0.2, now);
+                cg.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                n.connect(cf); cf.connect(cg); cg.connect(bgmGainNode);
+                n.start(now);
+                n.stop(now + 0.06);
+            }
+
+            // Bass: deep house sine
+            if (bass[idx] > 0) {
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.connect(g); g.connect(bgmGainNode);
+                o.type = 'sine';
+                o.frequency.value = bass[idx];
+                g.gain.setValueAtTime(0.4, now);
+                g.gain.exponentialRampToValueAtTime(0.001, now + beat * 0.7);
+                o.start(now);
+                o.stop(now + beat * 0.7);
+            }
+
+            // Chord stab: detuned triad on offbeats (Am: A4+C5+E5)
+            if (chord[idx]) {
+                const freqs = [440, 523, 659];
+                const detunes = [0, 7, -5];
+                freqs.forEach((f, i) => {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g); g.connect(bgmGainNode);
+                    o.type = 'square';
+                    o.frequency.value = f;
+                    o.detune.value = detunes[i];
+                    g.gain.setValueAtTime(0.06, now);
+                    g.gain.exponentialRampToValueAtTime(0.001, now + beat * 0.4);
+                    o.start(now);
+                    o.stop(now + beat * 0.4);
+                });
+            }
+
+            step++;
+        }
+
+        scheduleBeat();
+        bgmInterval = setInterval(scheduleBeat, beat * 1000);
+    }
+
+    function stopBGM() {
+        bgmPlaying = false;
+        if (bgmInterval) {
+            clearInterval(bgmInterval);
+            bgmInterval = null;
+        }
+        bgmPadOscs.forEach(o => { try { o.stop(); } catch {} });
+        bgmPadOscs = [];
+        if (bgmGainNode) {
+            try { bgmGainNode.gain.setValueAtTime(0, audioCtx.currentTime); } catch {}
+        }
+    }
+
+    function playNoiseBurst(duration, volume, filterFreq) {
+        const bufferSize = audioCtx.sampleRate * duration;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1);
+        }
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.value = filterFreq || 2000;
+        const g = audioCtx.createGain();
+        const now = audioCtx.currentTime;
+        g.gain.setValueAtTime(volume, now);
+        g.gain.exponentialRampToValueAtTime(0.001, now + duration);
+        noise.connect(filter);
+        filter.connect(g);
+        g.connect(audioCtx.destination);
+        noise.start(now);
+        noise.stop(now + duration);
+    }
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        if (!sfxEnabled) return;
+        try {
+            const now = audioCtx.currentTime;
+
+            switch (type) {
+                case 'select': {
+                    // "デュクシ！" - punchy impact hit
+                    // Layer 1: low thump
+                    const osc1 = audioCtx.createOscillator();
+                    const g1 = audioCtx.createGain();
+                    osc1.connect(g1); g1.connect(audioCtx.destination);
+                    osc1.frequency.setValueAtTime(150, now);
+                    osc1.frequency.exponentialRampToValueAtTime(50, now + 0.08);
+                    g1.gain.setValueAtTime(0.25, now);
+                    g1.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                    osc1.start(now);
+                    osc1.stop(now + 0.1);
+                    // Layer 2: mid click
+                    const osc2 = audioCtx.createOscillator();
+                    const g2 = audioCtx.createGain();
+                    osc2.connect(g2); g2.connect(audioCtx.destination);
+                    osc2.type = 'square';
+                    osc2.frequency.setValueAtTime(800, now);
+                    osc2.frequency.exponentialRampToValueAtTime(200, now + 0.04);
+                    g2.gain.setValueAtTime(0.15, now);
+                    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                    osc2.start(now);
+                    osc2.stop(now + 0.05);
+                    // Layer 3: noise burst (the "shi" part)
+                    playNoiseBurst(0.06, 0.12, 3000);
+                    return;
+                }
+                case 'correct': {
+                    // Bright rising chime
+                    const notes = [880, 1100, 1320];
+                    notes.forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, now + i * 0.06);
+                        g.gain.setValueAtTime(0, now + i * 0.06);
+                        g.gain.linearRampToValueAtTime(0.15, now + i * 0.06 + 0.01);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.12);
+                        o.start(now + i * 0.06);
+                        o.stop(now + i * 0.06 + 0.12);
+                    });
+                    playNoiseBurst(0.04, 0.06, 5000);
+                    return;
+                }
+                case 'wrong': {
+                    // Harsh buzz
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.type = 'sawtooth';
+                    o.frequency.setValueAtTime(180, now);
+                    o.frequency.linearRampToValueAtTime(80, now + 0.25);
+                    g.gain.setValueAtTime(0.12, now);
+                    g.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                    o.start(now);
+                    o.stop(now + 0.25);
+                    playNoiseBurst(0.08, 0.08, 800);
+                    return;
+                }
+                case 'combo': {
+                    // Ascending punchy hits - escalate with combo
+                    const combo = GS.combo || 3;
+                    let freqs, vol, speed;
+                    if (combo >= 15) {
+                        freqs = [400, 600, 800, 1000, 1200, 1500];
+                        vol = 0.15; speed = 0.05;
+                    } else if (combo >= 10) {
+                        freqs = [400, 600, 900, 1200, 1500];
+                        vol = 0.14; speed = 0.06;
+                    } else if (combo >= 7) {
+                        freqs = [400, 600, 900, 1200];
+                        vol = 0.13; speed = 0.065;
+                    } else if (combo >= 5) {
+                        freqs = [400, 600, 900, 1100];
+                        vol = 0.12; speed = 0.07;
+                    } else {
+                        freqs = [400, 600, 900];
+                        vol = 0.12; speed = 0.07;
+                    }
+                    freqs.forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.type = 'square';
+                        o.frequency.setValueAtTime(freq, now + i * speed);
+                        o.frequency.exponentialRampToValueAtTime(freq * 0.5, now + i * speed + 0.05);
+                        g.gain.setValueAtTime(0, now + i * speed);
+                        g.gain.linearRampToValueAtTime(vol, now + i * speed + 0.005);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + i * speed + 0.08);
+                        o.start(now + i * speed);
+                        o.stop(now + i * speed + 0.08);
+                    });
+                    if (combo >= 7) playNoiseBurst(0.1, 0.08, 1500);
+                    return;
+                }
+                case 'levelup': {
+                    const notes = [523, 659, 784, 1047];
+                    notes.forEach((freq, i) => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.connect(g); g.connect(audioCtx.destination);
+                        o.type = 'triangle';
+                        o.frequency.setValueAtTime(freq, now + i * 0.12);
+                        g.gain.setValueAtTime(0, now + i * 0.12);
+                        g.gain.linearRampToValueAtTime(0.15, now + i * 0.12 + 0.02);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.15);
+                        o.start(now + i * 0.12);
+                        o.stop(now + i * 0.12 + 0.15);
+                    });
+                    playNoiseBurst(0.03, 0.05, 6000);
+                    return;
+                }
+                case 'timewarn': {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.frequency.setValueAtTime(880, now);
+                    g.gain.setValueAtTime(0.08, now);
+                    g.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+                    o.start(now);
+                    o.stop(now + 0.06);
+                    return;
+                }
+                case 'gameover': {
+                    const o = audioCtx.createOscillator();
+                    const g = audioCtx.createGain();
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.type = 'sawtooth';
+                    o.frequency.setValueAtTime(400, now);
+                    o.frequency.linearRampToValueAtTime(100, now + 0.6);
+                    g.gain.setValueAtTime(0.12, now);
+                    g.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+                    o.start(now);
+                    o.stop(now + 0.6);
+                    playNoiseBurst(0.15, 0.06, 500);
+                    return;
+                }
+            }
+        } catch (e) {}
+    }
+
+    // ========== PARTICLE SYSTEM ==========
+    const particleCanvas = document.getElementById('particle-canvas');
+    const pCtx = particleCanvas.getContext('2d');
+    let particles = [];
+
+    function resizeParticleCanvas() {
+        particleCanvas.width = window.innerWidth;
+        particleCanvas.height = window.innerHeight;
+    }
+    resizeParticleCanvas();
+    window.addEventListener('resize', resizeParticleCanvas);
+
+    function spawnParticles(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+            particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10 - 3,
+                life: 1,
+                color,
+                size: 2 + Math.random() * 4
+            });
+        }
+    }
+
+    function updateParticles() {
+        pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+        particles = particles.filter(p => p.life > 0);
+        particles.forEach(p => {
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.15;
+            p.life -= 0.02;
+            p.vx *= 0.98;
+            pCtx.globalAlpha = p.life;
+            pCtx.fillStyle = p.color;
+            pCtx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        pCtx.globalAlpha = 1;
+        if (particles.length > 0) requestAnimationFrame(updateParticles);
+    }
+
+    function triggerParticles(element, color, comboCount) {
+        const rect = element.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const combo = comboCount || 0;
+
+        // More particles at higher combos
+        let count = 12;
+        if (combo >= 15) count = 40;
+        else if (combo >= 10) count = 30;
+        else if (combo >= 7) count = 22;
+        else if (combo >= 5) count = 16;
+        else if (combo >= 3) count = 14;
+
+        spawnParticles(cx, cy, color, count);
+
+        // Extra colored particles at high combos
+        if (combo >= 7) {
+            const colors = ['#ff00ff', '#00ffff', '#ffff00', '#ff6600'];
+            colors.forEach(c => {
+                spawnParticles(cx + (Math.random()-0.5)*30, cy + (Math.random()-0.5)*30, c, Math.floor(count / 4));
+            });
+        } else if (combo >= 5) {
+            spawnParticles(cx, cy, '#ff00ff', 6);
+            spawnParticles(cx, cy, '#00ffff', 6);
+        }
+
+        if (particles.length <= count) requestAnimationFrame(updateParticles);
+    }
+
+    // ========== GAME STATE ==========
+    const GS = {
+        mode: 'pair',
+        difficulty: 1,
+        score: 0,
+        combo: 0,
+        maxCombo: 0,
+        streak: 0,
+        bestStreak: 0,
+        totalCorrect: 0,
+        totalWrong: 0,
+        questionsAnswered: 0,
+        level: 1,
+        questionsInLevel: 0,
+        questionsPerLevel: 5,
+        targetNumber: 0,
+        targetNumber2: 0,
+        correctAnswers: [],
+        gridNumbers: [],
+        selectedIndices: [],
+        matchedIndices: [],
+        questionStartTime: 0,
+        totalResponseTime: 0,
+        timerValue: 0,
+        timerMax: 0,
+        timerInterval: null,
+        isAnswered: false,
+        lives: 3,
+        // Time attack
+        taTimerValue: 0,
+        taInterval: null,
+    };
+
+    const STORAGE_KEY = 'divisor-master-data';
+
+    function loadHighScores() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        } catch { return {}; }
+    }
+
+    function saveHighScore(mode, score) {
+        const data = loadHighScores();
+        const key = mode + '_' + GS.difficulty;
+        if (!data[key] || score > data[key]) {
+            data[key] = score;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            return true;
+        }
+        return false;
+    }
+
+    function getHighScore(mode, diff) {
+        const data = loadHighScores();
+        return data[mode + '_' + diff] || 0;
+    }
+
+    // ========== MATH UTILITIES ==========
+    function getDivisors(n) {
+        const divs = [];
+        for (let i = 1; i <= Math.sqrt(n); i++) {
+            if (n % i === 0) {
+                divs.push(i);
+                if (i !== n / i) divs.push(n / i);
+            }
+        }
+        return divs.sort((a, b) => a - b);
+    }
+
+    function getFactorPairs(n) {
+        const pairs = [];
+        for (let i = 1; i <= Math.sqrt(n); i++) {
+            if (n % i === 0) pairs.push([i, n / i]);
+        }
+        return pairs;
+    }
+
+    function getGCD(a, b) {
+        while (b) { [a, b] = [b, a % b]; }
+        return a;
+    }
+
+    function getCommonDivisors(a, b) {
+        return getDivisors(getGCD(a, b));
+    }
+
+    function getDiffRange(diff) {
+        const ranges = [
+            [12, 30],  // Lv1
+            [20, 48],  // Lv2
+            [30, 72],  // Lv3
+            [40, 96],  // Lv4
+            [50, 120], // Lv5
+        ];
+        return ranges[Math.min(diff - 1, 4)];
+    }
+
+    function getTimerSeconds(diff) {
+        return Math.max(8, 16 - diff * 1.5);
+    }
+
+    function generateTargetNumber(min, max, minDivisors) {
+        const candidates = [];
+        for (let n = min; n <= max; n++) {
+            if (getDivisors(n).length >= minDivisors) candidates.push(n);
+        }
+        return candidates[Math.floor(Math.random() * candidates.length)] || (min + max) >> 1;
+    }
+
+    // ========== UI HELPERS ==========
+    function showScreen(id) {
+        document.querySelectorAll('.overlay').forEach(o => o.classList.remove('active'));
+        document.getElementById('game-screen').classList.remove('active');
+        const el = document.getElementById(id);
+        if (el.classList.contains('overlay')) {
+            el.classList.add('active');
+        } else {
+            el.classList.add('active');
+        }
+    }
+
+    function flashScreen(type, comboCount) {
+        const el = document.getElementById('flash-overlay');
+        el.className = '';
+        el.style.background = '';
+        void el.offsetWidth;
+
+        // Intensify flash at high combos
+        if (type === 'correct' && comboCount) {
+            if (comboCount >= 10) {
+                el.style.background = 'rgba(255, 255, 255, 0.25)';
+            } else if (comboCount >= 7) {
+                el.style.background = 'rgba(0, 255, 255, 0.2)';
+            } else if (comboCount >= 5) {
+                el.style.background = 'rgba(57, 255, 20, 0.18)';
+            }
+        }
+        el.classList.add(type);
+        setTimeout(() => { el.className = ''; el.style.background = ''; }, 400);
+    }
+
+    function showComboPopup(combo) {
+        const el = document.getElementById('combo-popup');
+        el.className = '';
+
+        // Combo level thresholds
+        let lvClass = '';
+        let label = 'COMBO x' + combo + '!';
+        if (combo >= 15) {
+            lvClass = 'combo-lv5';
+            label = 'UNSTOPPABLE x' + combo + '!!';
+        } else if (combo >= 10) {
+            lvClass = 'combo-lv4';
+            label = 'INCREDIBLE x' + combo + '!!';
+        } else if (combo >= 7) {
+            lvClass = 'combo-lv3';
+            label = 'AMAZING x' + combo + '!';
+        } else if (combo >= 5) {
+            lvClass = 'combo-lv2';
+            label = 'GREAT x' + combo + '!';
+        }
+        el.textContent = label;
+
+        void el.offsetWidth;
+        el.classList.add('show');
+        if (lvClass) el.classList.add(lvClass);
+
+        // Screen shake at high combos
+        const gameScreen = document.getElementById('game-screen');
+        if (combo >= 10) {
+            gameScreen.classList.remove('screen-shake', 'screen-shake-hard');
+            void gameScreen.offsetWidth;
+            gameScreen.classList.add('screen-shake-hard');
+            setTimeout(() => gameScreen.classList.remove('screen-shake-hard'), 400);
+        } else if (combo >= 5) {
+            gameScreen.classList.remove('screen-shake', 'screen-shake-hard');
+            void gameScreen.offsetWidth;
+            gameScreen.classList.add('screen-shake');
+            setTimeout(() => gameScreen.classList.remove('screen-shake'), 300);
+        }
+
+        setTimeout(() => { el.className = ''; }, 900);
+    }
+
+    function showLevelUp(level) {
+        const overlay = document.getElementById('levelup-overlay');
+        const text = document.getElementById('levelup-text');
+        text.textContent = 'LEVEL ' + level + '!';
+        overlay.classList.add('show');
+        text.style.animation = 'none';
+        void text.offsetWidth;
+        text.style.animation = '';
+        setTimeout(() => overlay.classList.remove('show'), 1500);
+    }
+
+    function updateHUD() {
+        document.getElementById('score-display').textContent = GS.score;
+        document.getElementById('combo-display').textContent = 'x' + GS.combo;
+        document.getElementById('level-display').textContent = GS.level;
+
+        const acc = GS.questionsAnswered > 0
+            ? Math.round(GS.totalCorrect / GS.questionsAnswered * 100) + '%'
+            : '--%';
+        document.getElementById('stat-accuracy').textContent = acc;
+        document.getElementById('stat-streak').textContent = GS.streak;
+
+        const avg = GS.questionsAnswered > 0
+            ? (GS.totalResponseTime / GS.questionsAnswered / 1000).toFixed(1) + 's'
+            : '--s';
+        document.getElementById('stat-avgtime').textContent = avg;
+    }
+
+    // ========== SCREEN NAVIGATION ==========
+    function showModeSelect() {
+        initAudio();
+        playSound('select');
+        if (bgmEnabled && !bgmPlaying) startBGM();
+        updateModeButtons();
+        // Flash the PRESS START button
+        const btn = document.querySelector('.press-start');
+        if (btn) {
+            btn.style.transform = 'scale(1.1)';
+            btn.style.boxShadow = '0 0 40px rgba(57,255,20,0.8)';
+        }
+        flashScreen('correct');
+        setTimeout(() => {
+            if (btn) { btn.style.transform = ''; btn.style.boxShadow = ''; }
+            showScreen('mode-screen');
+        }, 200);
+    }
+
+    function selectMode(btn, mode) {
+        if (isModeLocked(mode)) {
+            playSound('select');
+            showPurchaseModal();
+            return;
+        }
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        GS.mode = mode;
+        playSound('select');
+    }
+
+    function selectDiff(btn, diff) {
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        GS.difficulty = diff;
+        playSound('select');
+    }
+
+    // ========== GAME START ==========
+    function startGame() {
+        initAudio();
+        playSound('select');
+
+        GS.score = 0;
+        GS.combo = 0;
+        GS.maxCombo = 0;
+        GS.streak = 0;
+        GS.bestStreak = 0;
+        GS.totalCorrect = 0;
+        GS.totalWrong = 0;
+        GS.questionsAnswered = 0;
+        GS.level = GS.difficulty;
+        GS.questionsInLevel = 0;
+        GS.totalResponseTime = 0;
+        GS.lives = 3;
+        GS.isAnswered = false;
+
+        document.querySelectorAll('.overlay').forEach(o => o.classList.remove('active'));
+        document.getElementById('game-screen').classList.add('active');
+
+        if (GS.mode === 'timeattack') {
+            startTimeAttack();
+        } else {
+            generateQuestion();
+        }
+    }
+
+    function restartGame() {
+        startGame();
+    }
+
+    // ========== TIME ATTACK ==========
+    function startTimeAttack() {
+        GS.taTimerValue = 60;
+        document.getElementById('timer-display').textContent = '60';
+        document.getElementById('timer-bar').style.width = '100%';
+        document.getElementById('timer-bar').className = '';
+        document.getElementById('hud-timer').classList.remove('urgent');
+
+        // Hide submit in timeattack for pair mode variant
+        generateQuestion();
+
+        GS.taInterval = setInterval(() => {
+            GS.taTimerValue--;
+            document.getElementById('timer-display').textContent = GS.taTimerValue;
+            const pct = (GS.taTimerValue / 60) * 100;
+            const bar = document.getElementById('timer-bar');
+            bar.style.width = pct + '%';
+
+            if (GS.taTimerValue <= 10) {
+                bar.className = 'danger';
+                document.getElementById('hud-timer').classList.add('urgent');
+                playSound('timewarn');
+            } else if (GS.taTimerValue <= 20) {
+                bar.className = 'warning';
+            }
+
+            if (GS.taTimerValue <= 0) {
+                clearInterval(GS.taInterval);
+                GS.taInterval = null;
+                endGame();
+            }
+        }, 1000);
+    }
+
+    // ========== QUESTION GENERATION ==========
+    function generateQuestion() {
+        GS.selectedIndices = [];
+        GS.matchedIndices = [];
+        GS.correctAnswers = [];
+        GS.isAnswered = false;
+        GS.questionStartTime = Date.now();
+
+        document.getElementById('btn-submit').classList.remove('hidden');
+        document.getElementById('btn-submit').textContent = 'SUBMIT';
+        document.getElementById('btn-next').classList.add('hidden');
+        hideFeedback();
+
+        const [rangeMin, rangeMax] = getDiffRange(GS.level);
+
+        if (GS.mode === 'pair' || (GS.mode === 'timeattack' && Math.random() < 0.5)) {
+            generatePairQuestion(rangeMin, rangeMax);
+        } else if (GS.mode === 'normal' || (GS.mode === 'timeattack' && Math.random() < 0.5)) {
+            generateNormalQuestion(rangeMin, rangeMax);
+        } else if (GS.mode === 'common') {
+            generateCommonQuestion(rangeMin, rangeMax);
+        } else {
+            generateNormalQuestion(rangeMin, rangeMax);
+        }
+
+        updateHUD();
+        startQuestionTimer();
+    }
+
+    function generatePairQuestion(min, max) {
+        GS.targetNumber = generateTargetNumber(min, max, 4);
+        const divisors = getDivisors(GS.targetNumber);
+
+        document.getElementById('question-text').textContent =
+            t('questionPair', GS.targetNumber);
+        document.getElementById('target-display').innerHTML =
+            '<div class="target-card">' + GS.targetNumber + '</div>';
+
+        // All divisors are correct
+        GS.correctAnswers = [...divisors];
+
+        // Handle perfect squares: duplicate the sqrt
+        const sqrt = Math.sqrt(GS.targetNumber);
+        if (Number.isInteger(sqrt)) {
+            GS.correctAnswers.push(sqrt);
+        }
+
+        const gridSet = new Set(divisors);
+        const finalGrid = [...divisors];
+
+        if (Number.isInteger(sqrt)) {
+            finalGrid.push(sqrt);
+        }
+
+        // Add distractors
+        const dummyCount = Math.max(3, Math.floor(divisors.length / 2));
+        let added = 0, safety = 0;
+        while (added < dummyCount && safety < 200) {
+            safety++;
+            const c = Math.floor(Math.random() * Math.ceil(GS.targetNumber * 1.3)) + 2;
+            if (!gridSet.has(c)) {
+                gridSet.add(c);
+                finalGrid.push(c);
+                added++;
+            }
+        }
+
+        GS.gridNumbers = finalGrid.sort((a, b) => a - b);
+        renderGrid(true);
+
+        document.getElementById('btn-submit').classList.add('hidden');
+    }
+
+    function generateNormalQuestion(min, max) {
+        GS.targetNumber = generateTargetNumber(min, max, 4);
+        const divisors = getDivisors(GS.targetNumber);
+
+        document.getElementById('question-text').textContent =
+            t('questionDivisor', GS.targetNumber);
+        document.getElementById('target-display').innerHTML =
+            '<div class="target-card">' + GS.targetNumber + '</div>';
+
+        GS.correctAnswers = [...divisors];
+
+        const gridSet = new Set(divisors);
+        const finalGrid = [...divisors];
+
+        // Add distractors
+        const targetCount = Math.max(12, divisors.length + 4);
+        let safety = 0;
+        while (finalGrid.length < targetCount && safety < 200) {
+            safety++;
+            const c = Math.floor(Math.random() * (GS.targetNumber + 10)) + 1;
+            if (!gridSet.has(c)) {
+                gridSet.add(c);
+                finalGrid.push(c);
+            }
+        }
+
+        GS.gridNumbers = finalGrid.sort((a, b) => a - b);
+        renderGrid(false);
+        updateSubmitLabel();
+    }
+
+    function generateCommonQuestion(min, max) {
+        let num1, num2, common;
+        let safety = 0;
+        do {
+            safety++;
+            num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+            num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+            common = getCommonDivisors(num1, num2);
+        } while ((num1 === num2 || common.length < 2) && safety < 200);
+
+        GS.targetNumber = num1;
+        GS.targetNumber2 = num2;
+        GS.correctAnswers = [...common];
+
+        document.getElementById('question-text').textContent =
+            t('questionCommon', num1, num2);
+        document.getElementById('target-display').innerHTML =
+            '<div class="target-card">' + num1 + '</div>' +
+            '<div class="target-symbol">&</div>' +
+            '<div class="target-card">' + num2 + '</div>';
+
+        const gridSet = new Set(common);
+        const finalGrid = [...common];
+
+        // Add individual divisors as distractors
+        getDivisors(num1).forEach(d => {
+            if (!gridSet.has(d) && Math.random() > 0.4) { gridSet.add(d); finalGrid.push(d); }
+        });
+        getDivisors(num2).forEach(d => {
+            if (!gridSet.has(d) && Math.random() > 0.4) { gridSet.add(d); finalGrid.push(d); }
+        });
+
+        while (finalGrid.length < 12) {
+            const c = Math.floor(Math.random() * 60) + 1;
+            if (!gridSet.has(c)) { gridSet.add(c); finalGrid.push(c); }
+        }
+
+        GS.gridNumbers = shuffle(finalGrid);
+        renderGrid(false);
+        updateSubmitLabel();
+    }
+
+    function shuffle(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // ========== TIMER ==========
+    function startQuestionTimer() {
+        if (GS.timerInterval) clearInterval(GS.timerInterval);
+
+        if (GS.mode === 'timeattack') {
+            // Time attack uses global timer, no per-question timer
+            return;
+        }
+
+        const secs = getTimerSeconds(GS.level);
+        GS.timerMax = secs;
+        GS.timerValue = secs;
+        document.getElementById('timer-display').textContent = Math.ceil(secs);
+        document.getElementById('timer-bar').style.width = '100%';
+        document.getElementById('timer-bar').className = '';
+        document.getElementById('hud-timer').classList.remove('urgent');
+
+        GS.timerInterval = setInterval(() => {
+            GS.timerValue -= 0.1;
+            const pct = Math.max(0, (GS.timerValue / GS.timerMax) * 100);
+            document.getElementById('timer-bar').style.width = pct + '%';
+            document.getElementById('timer-display').textContent = Math.ceil(GS.timerValue);
+
+            if (GS.timerValue <= 3) {
+                document.getElementById('timer-bar').className = 'danger';
+                document.getElementById('hud-timer').classList.add('urgent');
+                if (Math.ceil(GS.timerValue) !== Math.ceil(GS.timerValue + 0.1)) {
+                    playSound('timewarn');
+                }
+            } else if (GS.timerValue <= 5) {
+                document.getElementById('timer-bar').className = 'warning';
+            }
+
+            if (GS.timerValue <= 0) {
+                clearInterval(GS.timerInterval);
+                GS.timerInterval = null;
+                handleTimeOut();
+            }
+        }, 100);
+    }
+
+    function stopQuestionTimer() {
+        if (GS.timerInterval) {
+            clearInterval(GS.timerInterval);
+            GS.timerInterval = null;
+        }
+    }
+
+    function handleTimeOut() {
+        if (GS.isAnswered) return;
+        GS.isAnswered = true;
+        GS.combo = 0;
+        GS.streak = 0;
+        GS.totalWrong++;
+        GS.questionsAnswered++;
+        GS.totalResponseTime += Date.now() - GS.questionStartTime;
+
+        // Reveal correct answers
+        revealAnswers([], GS.correctAnswers);
+        flashScreen('wrong');
+        playSound('wrong');
+
+        const correctList = GS.mode === 'common'
+            ? getCommonDivisors(GS.targetNumber, GS.targetNumber2)
+            : getDivisors(GS.targetNumber);
+        showFeedback('timeout', 0, correctList);
+
+        document.getElementById('btn-submit').classList.add('hidden');
+        document.getElementById('btn-next').classList.remove('hidden');
+
+        GS.lives--;
+        if (GS.lives <= 0 && GS.mode !== 'timeattack') {
+            setTimeout(() => endGame(), 1500);
+        }
+
+        updateHUD();
+    }
+
+    // ========== GRID RENDERING ==========
+    function renderGrid(isPairMode) {
+        const grid = document.getElementById('number-grid');
+        grid.innerHTML = '';
+
+        GS.gridNumbers.forEach((num, idx) => {
+            const card = document.createElement('div');
+            card.className = 'num-card';
+            card.textContent = num;
+            card.dataset.idx = idx;
+
+            if (isPairMode) {
+                card.addEventListener('click', () => handlePairClick(card, idx));
+            } else {
+                card.addEventListener('click', () => handleNormalClick(card, idx));
+            }
+
+            grid.appendChild(card);
+        });
+    }
+
+    // ========== PAIR MODE CLICK ==========
+    function handlePairClick(card, idx) {
+        if (GS.isAnswered) return;
+        if (card.classList.contains('matched') || card.classList.contains('disabled')) return;
+
+        if (card.classList.contains('selected')) {
+            card.classList.remove('selected');
+            GS.selectedIndices = GS.selectedIndices.filter(i => i !== idx);
+            playSound('select');
+            return;
+        }
+
+        // Max 2 selected at a time
+        if (GS.selectedIndices.length >= 2) return;
+
+        card.classList.add('selected');
+        GS.selectedIndices.push(idx);
+        playSound('select');
+
+        if (GS.selectedIndices.length === 2) {
+            const a = GS.gridNumbers[GS.selectedIndices[0]];
+            const b = GS.gridNumbers[GS.selectedIndices[1]];
+
+            setTimeout(() => checkPair(a, b), 200);
+        }
+    }
+
+    function checkPair(a, b) {
+        const cards = document.querySelectorAll('.num-card');
+        const idx0 = GS.selectedIndices[0];
+        const idx1 = GS.selectedIndices[1];
+
+        if (a * b === GS.targetNumber) {
+            // Correct pair!
+            cards[idx0].classList.remove('selected');
+            cards[idx1].classList.remove('selected');
+            cards[idx0].classList.add('matched');
+            cards[idx1].classList.add('matched');
+            GS.matchedIndices.push(idx0, idx1);
+
+            triggerParticles(cards[idx0], '#39FF14');
+            triggerParticles(cards[idx1], '#39FF14');
+            playSound('correct');
+
+            // Check if all pairs found
+            if (GS.matchedIndices.length >= GS.correctAnswers.length) {
+                // All pairs matched!
+                pairComplete();
+            }
+        } else {
+            // Wrong pair
+            cards[idx0].classList.add('wrong-reveal');
+            cards[idx1].classList.add('wrong-reveal');
+            playSound('wrong');
+
+            setTimeout(() => {
+                cards[idx0].classList.remove('selected', 'wrong-reveal');
+                cards[idx1].classList.remove('selected', 'wrong-reveal');
+            }, 500);
+        }
+
+        GS.selectedIndices = [];
+    }
+
+    function pairComplete() {
+        GS.isAnswered = true;
+        stopQuestionTimer();
+        const responseTime = Date.now() - GS.questionStartTime;
+        GS.totalResponseTime += responseTime;
+
+        GS.combo++;
+        GS.streak++;
+        GS.totalCorrect++;
+        GS.questionsAnswered++;
+        if (GS.combo > GS.maxCombo) GS.maxCombo = GS.combo;
+        if (GS.streak > GS.bestStreak) GS.bestStreak = GS.streak;
+
+        const basePoints = 100 * GS.level;
+        const comboMultiplier = 1 + GS.combo * 0.5;
+        const timeBonus = Math.max(0, Math.round((10 - responseTime / 1000) * 10));
+        const points = Math.round(basePoints * comboMultiplier) + timeBonus;
+        GS.score += points;
+
+        flashScreen('correct', GS.combo);
+
+        if (GS.combo >= 3) {
+            showComboPopup(GS.combo);
+            playSound('combo');
+        }
+
+        // Disable remaining cards, trigger particles on matched
+        document.querySelectorAll('.num-card:not(.matched)').forEach(c => {
+            c.classList.add('disabled');
+        });
+        document.querySelectorAll('.num-card.matched').forEach(c => {
+            triggerParticles(c, '#39FF14', GS.combo);
+        });
+
+        showFeedback('correct', points, getDivisors(GS.targetNumber));
+        updateHUD();
+        checkAchievementsOnCorrect(responseTime);
+
+        GS.questionsInLevel++;
+        checkLevelUp();
+
+        // Auto-advance after correct answer
+        setTimeout(() => nextQuestion(), GS.mode === 'timeattack' ? 600 : 900);
+    }
+
+    // ========== NORMAL/COMMON MODE CLICK ==========
+    function handleNormalClick(card, idx) {
+        if (GS.isAnswered) return;
+        if (card.classList.contains('matched') || card.classList.contains('wrong-reveal')) return;
+
+        if (card.classList.contains('selected')) {
+            card.classList.remove('selected');
+            GS.selectedIndices = GS.selectedIndices.filter(i => i !== idx);
+        } else {
+            card.classList.add('selected');
+            GS.selectedIndices.push(idx);
+        }
+        playSound('select');
+        updateSubmitLabel();
+
+        // Auto-submit when selection count matches correct answer count
+        if (GS.selectedIndices.length === GS.correctAnswers.length) {
+            setTimeout(() => submitAnswer(), 250);
+        }
+    }
+
+    function updateSubmitLabel() {
+        const btn = document.getElementById('btn-submit');
+        const sel = GS.selectedIndices.length;
+        const total = GS.correctAnswers.length;
+        btn.textContent = 'SUBMIT (' + sel + '/' + total + ')';
+    }
+
+    // ========== SUBMIT ANSWER ==========
+    function submitAnswer() {
+        if (GS.isAnswered) return;
+        if (GS.mode === 'pair') return; // Pair mode doesn't use submit
+
+        GS.isAnswered = true;
+        stopQuestionTimer();
+        const responseTime = Date.now() - GS.questionStartTime;
+        GS.totalResponseTime += responseTime;
+        GS.questionsAnswered++;
+
+        const selectedNums = GS.selectedIndices.map(i => GS.gridNumbers[i]);
+        const correctSet = new Set(GS.correctAnswers);
+        const selectedSet = new Set(selectedNums);
+
+        let allCorrect = true;
+        let correctCount = 0;
+
+        // Check selected
+        selectedNums.forEach(n => {
+            if (correctSet.has(n)) correctCount++;
+            else allCorrect = false;
+        });
+
+        // Check if all correct answers were selected
+        if (correctCount < GS.correctAnswers.length) allCorrect = false;
+
+        const missed = GS.correctAnswers.filter(n => !selectedSet.has(n));
+        const wrongSelected = selectedNums.filter(n => !correctSet.has(n));
+
+        revealAnswers(wrongSelected, missed);
+
+        if (allCorrect) {
+            // Perfect!
+            GS.combo++;
+            GS.streak++;
+            GS.totalCorrect++;
+            if (GS.combo > GS.maxCombo) GS.maxCombo = GS.combo;
+            if (GS.streak > GS.bestStreak) GS.bestStreak = GS.streak;
+
+            const basePoints = 100 * GS.level;
+            const comboMultiplier = 1 + GS.combo * 0.5;
+            const timeBonus = Math.max(0, Math.round((10 - responseTime / 1000) * 10));
+            const perfectBonus = wrongSelected.length === 0 ? 200 : 0;
+            const points = Math.round(basePoints * comboMultiplier) + timeBonus + perfectBonus;
+            GS.score += points;
+
+            flashScreen('correct', GS.combo);
+            playSound('correct');
+
+            if (GS.combo >= 3) {
+                showComboPopup(GS.combo);
+                playSound('combo');
+            }
+
+            // Particles on correct cards (combo-aware)
+            document.querySelectorAll('.num-card.matched').forEach(c => {
+                triggerParticles(c, '#39FF14', GS.combo);
+            });
+
+            const correctList = GS.mode === 'common'
+                ? getCommonDivisors(GS.targetNumber, GS.targetNumber2)
+                : getDivisors(GS.targetNumber);
+            showFeedback('correct', points, correctList);
+            checkAchievementsOnCorrect(responseTime);
+
+            GS.questionsInLevel++;
+            checkLevelUp();
+
+            updateHUD();
+            document.getElementById('btn-submit').classList.add('hidden');
+
+            // Auto-advance after correct answer
+            setTimeout(() => nextQuestion(), GS.mode === 'timeattack' ? 600 : 900);
+        } else {
+            GS.combo = 0;
+            GS.streak = 0;
+            GS.totalWrong++;
+            flashScreen('wrong');
+            playSound('wrong');
+
+            const correctList = GS.mode === 'common'
+                ? getCommonDivisors(GS.targetNumber, GS.targetNumber2)
+                : getDivisors(GS.targetNumber);
+            showFeedback('wrong', 0, correctList);
+
+            GS.lives--;
+            if (GS.lives <= 0 && GS.mode !== 'timeattack') {
+                setTimeout(() => endGame(), 1500);
+                updateHUD();
+                return;
+            }
+
+            updateHUD();
+            document.getElementById('btn-submit').classList.add('hidden');
+            document.getElementById('btn-next').classList.remove('hidden');
+
+            if (GS.mode === 'timeattack') {
+                setTimeout(() => nextQuestion(), 800);
+            }
+        }
+    }
+
+    function revealAnswers(wrongSelected, missed) {
+        const cards = document.querySelectorAll('.num-card');
+        const correctSet = new Set(GS.correctAnswers);
+
+        cards.forEach((card, idx) => {
+            const num = GS.gridNumbers[idx];
+            if (card.classList.contains('selected') && correctSet.has(num)) {
+                card.classList.remove('selected');
+                card.classList.add('matched');
+            } else if (card.classList.contains('selected') && !correctSet.has(num)) {
+                card.classList.remove('selected');
+                card.classList.add('wrong-reveal');
+            } else if (correctSet.has(num) && !card.classList.contains('matched')) {
+                card.classList.add('missed');
+            }
+            card.style.pointerEvents = 'none';
+        });
+    }
+
+    // ========== LEVEL SYSTEM ==========
+    function checkLevelUp() {
+        if (GS.questionsInLevel >= GS.questionsPerLevel && GS.level < 5) {
+            GS.level++;
+            GS.questionsInLevel = 0;
+            showLevelUp(GS.level);
+            playSound('levelup');
+        }
+    }
+
+    // ========== FEEDBACK ==========
+    function showFeedback(type, points, correctList) {
+        const fb = document.getElementById('answer-feedback');
+        let html = '';
+
+        if (type === 'correct') {
+            html += '<div class="feedback-msg correct">' + t('feedbackCorrect') + '</div>';
+            html += '<div class="feedback-detail"><span class="points">+' + points + ' pts</span></div>';
+        } else if (type === 'wrong') {
+            html += '<div class="feedback-msg wrong">' + t('feedbackMiss') + '</div>';
+        } else if (type === 'timeout') {
+            html += '<div class="feedback-msg timeout">' + t('feedbackTimeUp') + '</div>';
+        }
+
+        if (correctList && correctList.length > 0) {
+            const label = GS.mode === 'common'
+                ? t('feedbackCommon')
+                : t('feedbackDivisors', GS.targetNumber);
+            const unique = [...new Set(correctList)].sort((a, b) => a - b);
+            html += '<div class="feedback-answer">' + label + unique.join(', ') + '</div>';
+        }
+
+        fb.innerHTML = html;
+        fb.classList.add('show');
+    }
+
+    function hideFeedback() {
+        const fb = document.getElementById('answer-feedback');
+        fb.innerHTML = '';
+        fb.classList.remove('show');
+    }
+
+    // ========== QUIT ==========
+    function confirmQuit() {
+        endGame();
+    }
+
+    // ========== NEXT QUESTION ==========
+    function nextQuestion() {
+        hideFeedback();
+        generateQuestion();
+    }
+
+    // ========== END GAME ==========
+    function endGame() {
+        stopQuestionTimer();
+        if (GS.taInterval) {
+            clearInterval(GS.taInterval);
+            GS.taInterval = null;
+        }
+
+        playSound('gameover');
+        checkAchievementsOnEnd();
+
+        const isNewRecord = saveHighScore(GS.mode, GS.score);
+        const highScore = getHighScore(GS.mode, GS.difficulty);
+
+        document.getElementById('game-screen').classList.remove('active');
+
+        const title = document.getElementById('result-title');
+        title.textContent = GS.score > 0 ? 'GAME OVER' : 'GAME OVER';
+        title.className = 'result-title ' + (GS.score > 0 ? 'win' : 'lose');
+
+        document.getElementById('result-score').textContent = GS.score;
+
+        const accuracy = GS.questionsAnswered > 0
+            ? Math.round(GS.totalCorrect / GS.questionsAnswered * 100)
+            : 0;
+        const avgTime = GS.questionsAnswered > 0
+            ? (GS.totalResponseTime / GS.questionsAnswered / 1000).toFixed(1)
+            : '--';
+
+        const statsHTML = `
+            <div class="result-stat-row">
+                <span class="result-stat-label">Questions</span>
+                <span class="result-stat-value">${GS.questionsAnswered}</span>
+            </div>
+            <div class="result-stat-row">
+                <span class="result-stat-label">Accuracy</span>
+                <span class="result-stat-value">${accuracy}%</span>
+            </div>
+            <div class="result-stat-row">
+                <span class="result-stat-label">Max Combo</span>
+                <span class="result-stat-value">x${GS.maxCombo}</span>
+            </div>
+            <div class="result-stat-row">
+                <span class="result-stat-label">Best Streak</span>
+                <span class="result-stat-value">${GS.bestStreak}</span>
+            </div>
+            <div class="result-stat-row">
+                <span class="result-stat-label">Avg Time</span>
+                <span class="result-stat-value">${avgTime}s</span>
+            </div>
+            <div class="result-stat-row">
+                <span class="result-stat-label">Level Reached</span>
+                <span class="result-stat-value">${GS.level}</span>
+            </div>
+            <div class="result-stat-row">
+                <span class="result-stat-label">High Score</span>
+                <span class="result-stat-value">${highScore}${isNewRecord ? '<span class="new-record">NEW!</span>' : ''}</span>
+            </div>
+        `;
+
+        document.getElementById('result-stats').innerHTML = statsHTML;
+        showScreen('results-screen');
+    }
+
+    // ========== KEYBOARD ==========
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            if (document.getElementById('title-screen').classList.contains('active')) {
+                showModeSelect();
+            } else if (document.getElementById('mode-screen').classList.contains('active')) {
+                startGame();
+            } else if (document.getElementById('results-screen').classList.contains('active')) {
+                restartGame();
+            } else if (document.getElementById('game-screen').classList.contains('active')) {
+                if (!GS.isAnswered) {
+                    submitAnswer();
+                } else {
+                    nextQuestion();
+                }
+            }
+        }
+    });
+
+    // Load settings and init audio on first interaction
+    loadSettings();
+    loadPurchaseState();
+    loadAchievements();
+    applyLanguage();
+    updateModeButtons();
+    document.addEventListener('click', initAudio, { once: true });
+    document.addEventListener('touchstart', initAudio, { once: true });
+    </script>
+</body>
+</html>

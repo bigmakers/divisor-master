@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サポート | 約数マスター</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cyan: #00e5ff;
+            --magenta: #ff00e5;
+            --green: #39ff14;
+            --blue-dark: #0a0e2a;
+            --blue-mid: #111940;
+            --text: #e8eaf6;
+            --text-sub: #9ea7c0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--blue-dark);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.8;
+        }
+        .lp-header {
+            position: fixed; top: 0; left: 0; right: 0;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 24px;
+            background: rgba(10,14,42,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,229,255,0.1);
+            z-index: 1000;
+        }
+        .lp-header-logo {
+            font-family: 'Outfit', sans-serif; font-weight: 900; font-size: 0.85rem;
+            color: var(--cyan); letter-spacing: 2px; text-decoration: none;
+        }
+        .lp-lang-btn {
+            font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.7rem;
+            color: var(--cyan); background: rgba(0,229,255,0.08);
+            border: 1px solid rgba(0,229,255,0.3); border-radius: 3px;
+            padding: 4px 14px; cursor: pointer; letter-spacing: 1px;
+        }
+        .support-container {
+            max-width: 700px; margin: 0 auto; padding: 100px 24px 80px;
+        }
+        .support-title {
+            font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 900;
+            color: var(--cyan); margin-bottom: 8px;
+        }
+        .support-subtitle {
+            color: var(--text-sub); font-size: 0.95rem; margin-bottom: 48px;
+        }
+
+        .faq-section { margin-bottom: 48px; }
+        .faq-section h2 {
+            font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 20px;
+            padding-left: 16px; border-left: 3px solid var(--cyan);
+        }
+        .faq-item {
+            background: rgba(0,229,255,0.04);
+            border: 1px solid rgba(0,229,255,0.1);
+            border-radius: 12px; padding: 20px 24px; margin-bottom: 12px;
+        }
+        .faq-q {
+            font-weight: 700; color: #fff; font-size: 0.95rem; margin-bottom: 8px;
+        }
+        .faq-q::before { content: 'Q. '; color: var(--cyan); }
+        .faq-a { color: var(--text-sub); font-size: 0.9rem; line-height: 1.8; }
+        .faq-a::before { content: 'A. '; color: var(--green); font-weight: 700; }
+
+        .contact-section {
+            background: rgba(0,229,255,0.06);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 16px; padding: 32px; text-align: center;
+        }
+        .contact-section h2 {
+            font-size: 1.2rem; color: #fff; margin-bottom: 12px;
+        }
+        .contact-section p {
+            color: var(--text-sub); font-size: 0.9rem; margin-bottom: 20px;
+        }
+        .contact-email {
+            display: inline-block; color: var(--cyan); font-size: 1rem;
+            text-decoration: none; border: 1px solid rgba(0,229,255,0.3);
+            padding: 12px 32px; border-radius: 8px; transition: all 0.2s;
+        }
+        .contact-email:hover { background: rgba(0,229,255,0.1); }
+
+        .back-link {
+            display: inline-block; margin-top: 40px; color: var(--cyan);
+            text-decoration: none; font-size: 0.9rem;
+            border: 1px solid rgba(0,229,255,0.3);
+            padding: 10px 28px; border-radius: 8px; transition: all 0.2s;
+        }
+        .back-link:hover { background: rgba(0,229,255,0.1); }
+
+        footer {
+            text-align: center; padding: 40px 20px; font-size: 0.8rem;
+            color: var(--text-sub); border-top: 1px solid rgba(0,229,255,0.08);
+        }
+        .footer-links { margin-bottom: 12px; }
+        .footer-links a {
+            color: var(--text-sub); text-decoration: none; margin: 0 12px; transition: color 0.2s;
+        }
+        .footer-links a:hover { color: var(--cyan); }
+
+        @media (max-width: 600px) {
+            .support-title { font-size: 1.5rem; }
+            .support-container { padding: 80px 16px 60px; }
+            .contact-section { padding: 24px 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<header class="lp-header">
+    <a href="index.html" class="lp-header-logo">DIVISOR MASTER</a>
+    <button class="lp-lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
+</header>
+
+<main class="support-container">
+    <h1 class="support-title" data-i18n="title">サポート</h1>
+    <p class="support-subtitle" data-i18n="subtitle">約数マスターに関するよくある質問と、お問い合わせ方法をご案内します。</p>
+
+    <div class="faq-section">
+        <h2 data-i18n="faqTitle">よくある質問</h2>
+
+        <div class="faq-item">
+            <div class="faq-q" data-i18n="faq1q">アプリは無料ですか？</div>
+            <div class="faq-a" data-i18n="faq1a">はい、完全無料です。アプリ内課金や広告も一切ありません。</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-q" data-i18n="faq2q">データはどこに保存されますか？</div>
+            <div class="faq-a" data-i18n="faq2a">スコアや実績などのデータは、お使いの端末内（localStorage）にのみ保存されます。サーバーへの送信は一切行いません。</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-q" data-i18n="faq3q">対象年齢はありますか？</div>
+            <div class="faq-a" data-i18n="faq3a">小学校高学年〜中学生を主な対象としていますが、大人の方の脳トレとしてもお楽しみいただけます。</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-q" data-i18n="faq4q">データを削除したいです</div>
+            <div class="faq-a" data-i18n="faq4a">ブラウザの設定からサイトデータ（localStorage）を削除するか、アプリを再インストールしてください。</div>
+        </div>
+
+        <div class="faq-item">
+            <div class="faq-q" data-i18n="faq5q">バグを見つけました</div>
+            <div class="faq-a" data-i18n="faq5a">下記のメールアドレスまでお気軽にご連絡ください。端末・ブラウザの情報もお伝えいただけると助かります。</div>
+        </div>
+    </div>
+
+    <div class="contact-section">
+        <h2 data-i18n="contactTitle">お問い合わせ</h2>
+        <p data-i18n="contactBody">ご質問・ご要望・バグ報告など、お気軽にご連絡ください。</p>
+        <a href="mailto:newmooncoffee@gmail.com" class="contact-email">newmooncoffee@gmail.com</a>
+    </div>
+
+    <a href="index.html" class="back-link" data-i18n="backToTop" data-i18n-html>&larr; トップページに戻る</a>
+</main>
+
+<footer>
+    <div class="footer-links">
+        <a href="index.html" data-i18n="footerHome">トップ</a>
+        <a href="privacy.html" data-i18n="footerPrivacy">プライバシーポリシー</a>
+        <a href="https://apps.apple.com/app/id6758949613" target="_blank" rel="noopener">App Store</a>
+    </div>
+    <span>&copy; 2026 DIVISOR MASTER. All rights reserved.</span>
+</footer>
+
+<script>
+const STRINGS = {
+    ja: {
+        title: 'サポート',
+        subtitle: '約数マスターに関するよくある質問と、お問い合わせ方法をご案内します。',
+        faqTitle: 'よくある質問',
+        faq1q: 'アプリは無料ですか？',
+        faq1a: 'はい、完全無料です。アプリ内課金や広告も一切ありません。',
+        faq2q: 'データはどこに保存されますか？',
+        faq2a: 'スコアや実績などのデータは、お使いの端末内（localStorage）にのみ保存されます。サーバーへの送信は一切行いません。',
+        faq3q: '対象年齢はありますか？',
+        faq3a: '小学校高学年〜中学生を主な対象としていますが、大人の方の脳トレとしてもお楽しみいただけます。',
+        faq4q: 'データを削除したいです',
+        faq4a: 'ブラウザの設定からサイトデータ（localStorage）を削除するか、アプリを再インストールしてください。',
+        faq5q: 'バグを見つけました',
+        faq5a: '下記のメールアドレスまでお気軽にご連絡ください。端末・ブラウザの情報もお伝えいただけると助かります。',
+        contactTitle: 'お問い合わせ',
+        contactBody: 'ご質問・ご要望・バグ報告など、お気軽にご連絡ください。',
+        backToTop: '&larr; トップページに戻る',
+        footerHome: 'トップ',
+        footerPrivacy: 'プライバシーポリシー',
+    },
+    en: {
+        title: 'Support',
+        subtitle: 'Find answers to common questions and learn how to contact us.',
+        faqTitle: 'Frequently Asked Questions',
+        faq1q: 'Is the app free?',
+        faq1a: 'Yes, it is completely free. There are no in-app purchases or ads.',
+        faq2q: 'Where is my data stored?',
+        faq2a: 'Your scores and achievements are stored only on your device using localStorage. No data is ever sent to any server.',
+        faq3q: 'What age group is this for?',
+        faq3a: 'It is primarily designed for upper elementary and middle school students, but adults can also enjoy it as a brain training exercise.',
+        faq4q: 'How do I delete my data?',
+        faq4a: 'You can clear the site data (localStorage) from your browser settings, or reinstall the app.',
+        faq5q: 'I found a bug',
+        faq5a: 'Please feel free to contact us at the email address below. It helps if you include your device and browser information.',
+        contactTitle: 'Contact Us',
+        contactBody: 'Questions, feature requests, or bug reports — feel free to reach out.',
+        backToTop: '&larr; Back to Home',
+        footerHome: 'Home',
+        footerPrivacy: 'Privacy Policy',
+    }
+};
+
+let currentLang = localStorage.getItem('dm-lang') || 'ja';
+
+function applyLang(lang) {
+    currentLang = lang;
+    localStorage.setItem('dm-lang', lang);
+    document.documentElement.lang = lang === 'ja' ? 'ja' : 'en';
+    document.getElementById('langBtn').textContent = lang === 'ja' ? 'EN' : 'JA';
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (STRINGS[lang][key] !== undefined) {
+            if (el.hasAttribute('data-i18n-html')) {
+                el.innerHTML = STRINGS[lang][key];
+            } else {
+                el.textContent = STRINGS[lang][key];
+            }
+        }
+    });
+}
+
+function toggleLang() {
+    applyLang(currentLang === 'ja' ? 'en' : 'ja');
+}
+
+applyLang(currentLang);
+</script>
+</body>
+</html>
