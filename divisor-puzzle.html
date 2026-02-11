@@ -271,16 +271,6 @@
             line-height: 1.4;
         }
 
-        .mode-btn.locked {
-            opacity: 0.45;
-            border-color: rgba(255,255,255,0.1);
-            background: rgba(0,10,20,0.6);
-        }
-        .mode-btn.locked .mode-title { color: rgba(255,255,255,0.4) !important; text-shadow: none; }
-        .mode-btn.locked .mode-desc { display: none; }
-        .lock-icon { display: none; font-size: 1.1rem; margin-top: 4px; }
-        .mode-btn.locked .lock-icon { display: block; }
-
         /* ========== ACHIEVEMENTS ========== */
         .trophy-btn {
             font-size: 1.4rem;
@@ -1185,17 +1175,14 @@
                 <button class="mode-btn" data-mode="normal" onclick="selectMode(this, 'normal')">
                     <span class="mode-title">DIVISOR</span>
                     <span class="mode-desc" data-i18n="modeDivisorDesc">約数をすべて選べ</span>
-                    <span class="lock-icon">&#128274;</span>
                 </button>
                 <button class="mode-btn" data-mode="common" onclick="selectMode(this, 'common')">
                     <span class="mode-title">COMMON</span>
                     <span class="mode-desc" data-i18n="modeCommonDesc">2つの数の公約数を見つけろ</span>
-                    <span class="lock-icon">&#128274;</span>
                 </button>
                 <button class="mode-btn" data-mode="timeattack" onclick="selectMode(this, 'timeattack')">
                     <span class="mode-title">TIME ATK</span>
                     <span class="mode-desc" data-i18n="modeTimeDesc">60秒間で何問解ける？</span>
-                    <span class="lock-icon">&#128274;</span>
                 </button>
             </div>
 
@@ -1225,18 +1212,6 @@
                 <button class="big-btn" onclick="restartGame()">RETRY</button>
                 <button class="big-btn" style="background: linear-gradient(180deg, #4a5a6a 0%, #2a3a4a 100%); box-shadow: 0 4px 0 #1a2a3a;" onclick="showScreen('title-screen')">HOME</button>
             </div>
-        </div>
-    </div>
-
-    <!-- ========== PURCHASE MODAL ========== -->
-    <div class="overlay" id="purchase-modal">
-        <div class="overlay-content" style="max-width:360px;">
-            <div style="font-size:2rem; margin-bottom:12px;">&#128274;</div>
-            <div style="font-size:1rem; color:var(--neon-cyan); font-weight:900; margin-bottom:8px; letter-spacing:2px;" data-i18n="modeLockedTitle">このモードは有料です</div>
-            <div style="font-size:0.8rem; color:rgba(255,255,255,0.6); margin-bottom:24px;" data-i18n="modeLockedDesc">DIVISOR / COMMON / TIME ATK をアンロック</div>
-            <button class="big-btn" onclick="doPurchase()" data-i18n="modeLockedBuy" style="margin-bottom:10px;">購入する（¥480）</button>
-            <button class="big-btn blue" onclick="doRestore()" data-i18n="modeLockedRestore" style="margin-bottom:10px;">購入を復元</button>
-            <button class="big-btn" onclick="hidePurchaseModal()" data-i18n="modeLockedCancel" style="background: linear-gradient(180deg, #4a5a6a 0%, #2a3a4a 100%); box-shadow: 0 4px 0 #1a2a3a;">キャンセル</button>
         </div>
     </div>
 
@@ -1340,14 +1315,6 @@
             feedbackTimeUp: 'TIME UP!',
             feedbackCommon: '公約数: ',
             feedbackDivisors: (n) => n + ' の約数: ',
-            modeLockedTitle: 'このモードは有料です',
-            modeLockedDesc: 'DIVISOR / COMMON / TIME ATK をアンロック',
-            modeLockedBuy: '購入する（¥480）',
-            modeLockedRestore: '購入を復元',
-            modeLockedCancel: 'キャンセル',
-            purchaseSuccess: '購入完了！全モード解放！',
-            restoreSuccess: '復元完了！',
-            purchaseError: '購入に失敗しました',
             achievements: '実績',
             ach_firstGame: 'はじめの一歩',
             ach_firstPerfect: 'パーフェクト',
@@ -1395,14 +1362,6 @@
             feedbackTimeUp: 'TIME UP!',
             feedbackCommon: 'Common divisors: ',
             feedbackDivisors: (n) => 'Divisors of ' + n + ': ',
-            modeLockedTitle: 'This mode is locked',
-            modeLockedDesc: 'Unlock DIVISOR / COMMON / TIME ATK',
-            modeLockedBuy: 'Purchase (¥480)',
-            modeLockedRestore: 'Restore Purchase',
-            modeLockedCancel: 'Cancel',
-            purchaseSuccess: 'Purchased! All modes unlocked!',
-            restoreSuccess: 'Restore complete!',
-            purchaseError: 'Purchase failed',
             achievements: 'Achievements',
             ach_firstGame: 'First Step',
             ach_firstPerfect: 'Perfect',
@@ -1447,85 +1406,6 @@
         saveSettings();
         applyLanguage();
         playSound('select');
-    }
-
-    // ========== MODE UNLOCK (IAP) ==========
-    const IAP_STORAGE_KEY = 'divisor-master-iap';
-    let modesUnlocked = false;
-
-    function loadPurchaseState() {
-        try {
-            const d = JSON.parse(localStorage.getItem(IAP_STORAGE_KEY));
-            if (d && d.unlocked) modesUnlocked = true;
-        } catch {}
-    }
-
-    function savePurchaseState(v) {
-        modesUnlocked = v;
-        localStorage.setItem(IAP_STORAGE_KEY, JSON.stringify({ unlocked: v }));
-    }
-
-    function isModeLocked(mode) {
-        return !modesUnlocked && mode !== 'pair';
-    }
-
-    function updateModeButtons() {
-        document.querySelectorAll('.mode-btn').forEach(btn => {
-            const mode = btn.dataset.mode;
-            if (isModeLocked(mode)) {
-                btn.classList.add('locked');
-            } else {
-                btn.classList.remove('locked');
-            }
-        });
-    }
-
-    function showPurchaseModal() {
-        document.getElementById('purchase-modal').classList.add('active');
-    }
-
-    function hidePurchaseModal() {
-        document.getElementById('purchase-modal').classList.remove('active');
-    }
-
-    function doPurchase() {
-        // Native StoreKit integration placeholder
-        // For now, simulate purchase for testing
-        if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins.StoreKit) {
-            window.Capacitor.Plugins.StoreKit.purchase().then(r => {
-                if (r.purchased) {
-                    savePurchaseState(true);
-                    updateModeButtons();
-                    hidePurchaseModal();
-                    flashScreen('correct');
-                    playSound('levelup');
-                }
-            }).catch(() => alert(t('purchaseError')));
-        } else {
-            // Browser: direct unlock for testing
-            savePurchaseState(true);
-            updateModeButtons();
-            hidePurchaseModal();
-            flashScreen('correct');
-            playSound('levelup');
-        }
-    }
-
-    function doRestore() {
-        if (window.Capacitor && window.Capacitor.isNativePlatform() && window.Capacitor.Plugins.StoreKit) {
-            window.Capacitor.Plugins.StoreKit.restorePurchases().then(r => {
-                if (r.purchased) {
-                    savePurchaseState(true);
-                    updateModeButtons();
-                    hidePurchaseModal();
-                    alert(t('restoreSuccess'));
-                } else {
-                    alert(t('purchaseError'));
-                }
-            }).catch(() => alert(t('purchaseError')));
-        } else {
-            alert(t('purchaseError'));
-        }
     }
 
     // ========== ACHIEVEMENTS SYSTEM ==========
@@ -2302,7 +2182,6 @@
         initAudio();
         playSound('select');
         if (bgmEnabled && !bgmPlaying) startBGM();
-        updateModeButtons();
         // Flash the PRESS START button
         const btn = document.querySelector('.press-start');
         if (btn) {
@@ -2317,11 +2196,6 @@
     }
 
     function selectMode(btn, mode) {
-        if (isModeLocked(mode)) {
-            playSound('select');
-            showPurchaseModal();
-            return;
-        }
         document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         GS.mode = mode;
@@ -3053,10 +2927,8 @@
 
     // Load settings and init audio on first interaction
     loadSettings();
-    loadPurchaseState();
     loadAchievements();
     applyLanguage();
-    updateModeButtons();
     document.addEventListener('click', initAudio, { once: true });
     document.addEventListener('touchstart', initAudio, { once: true });
     </script>
